@@ -1,0 +1,106 @@
+<!-- 
+  // bower install showdown
+  // bower install underscore
+  // bower install showdown
+  // bower install bootstrap
+  // bower install json2
+  // bower install bootstrap-treeview
+  // mkdir js img fonts css json
+  //  cp bower_components/jquery/dist/jquery.min.js test/js
+  //  cp bower_components/bootstrap/dist/css/* test/css
+  //  cp bower_components/bootstrap/dist/js/bootstrap.min.js test/js
+  //  cp bower_components/bootstrap/dist/fonts/glyphicons-halflings-regular.* test/fonts
+  //  cp bower_components/underscore/underscore-min.js test/js/
+  //  cp bower_components/json2/*js test/js/
+  //  cp bower_components/bootstrap-treeview/dist/bootstrap-treeview.min.js test/js/
+  // cp bower_components/showdown/dist/showdown.min.js test/js/
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Like-o-tron</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/progress.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+      <![endif]-->
+  </head>
+  <body>
+    <section>
+
+      <!--body-->
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="input-group input-group-lg">
+            <input type="text" class="form-control input-lg" id="topic" placeholder="#hashtag">
+            <span class="input-group-btn">
+              <button class="btn btn-default btn-lg" type="submit">Search</button>
+            </span>
+          </div><!-- /input-group -->
+        </div><!-- /.col-lg-6 -->
+      </div><!-- /.row -->
+      <button type="button" class="btn btn-success btn-lg btn-block" onclick="senddata(true)">Like</button>
+      <button type="button" class="btn btn-danger btn-lg btn-block" onclick="senddata(false)">Don't like</button>
+      <br/>
+      <div class="progress" data-amount="50">
+        <div class="amount"></div>
+      </div>
+      <div class="col-lg-10 col-md-offset-1">
+      </div>
+      <div class="row">
+        <div id="output" class="well col-lg-7">
+
+        </div>
+      </div>
+      <!-- end body -->
+    </section>
+
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="js/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-treeview.min.js"></script>
+    <script type="text/javascript" src="js/json2.js"></script>
+    <script type="text/javascript" src="js/websocket.js"></script>
+    <script>
+$(document).ready(function () {
+  var dataval = parseInt($('.progress').attr("data-amount"));
+  if (dataval < 100) {
+    $('.progress .amount').css("width", 100 - dataval + "%");
+
+  }
+
+  /*FOR DEMO ONLY*/
+  $('#increase').click(function () {
+    modifyProgressVal(1);
+
+  });
+  $('#decrease').click(function () {
+    modifyProgressVal(-1);
+
+  });
+  function modifyProgressVal(type) {
+    dataval = parseInt($('.progress').attr("data-amount"));
+    if (type == 1) dataval = Math.min(100,dataval + 10)
+    else if (type == -1) dataval = Math.max(0,dataval - 10);
+    $('.progress .amount').css("width", 100 - dataval + "%");
+    $('.progress').attr("data-amount", dataval);
+
+  }
+
+});
+    </script>
+  </body>
+</html>
+

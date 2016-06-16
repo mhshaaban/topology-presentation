@@ -1,0 +1,6 @@
+.target{
+    width: 600px;
+    height: 200px;
+    background-image:url('/img/gauge.png');
+    font:18px arial,sans-serif
+}

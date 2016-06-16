@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Like-o-tron</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/heart.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <section>
+
+      <!--body-->
+      <div class="row">
+        <div class="col-lg-12">
+            <div class="input-group input-group-lg">
+                <input type="text" class="form-control input-lg" id="name" placeholder="name">
+                <span class="input-group-btn">
+                    <button class="btn btn-default btn-lg" id="btnConnect" type="submit">Connect</button>
+                </span>
+            </div><!-- /input-group -->
+        </div>
+        </div>
+            <button type="button" class="btn btn-success btn-lg btn-block" onclick="senddata('start')">Start</button>
+            <button type="button" class="btn btn-danger btn-lg btn-block" onclick="senddata('stop')">Stop</button>
+            <div id="heart" style="visibility:hidden">
+                  <img class="bottom" src="img/heart.png" width="100px">
+            </div>
+      <!-- end body -->
+    </section>
+
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="js/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-treeview.min.js"></script>
+    <script type="text/javascript" src="js/json2.js"></script>
+    <script>
+        var ws;
+        window.onload = function() {
+            var btnConnect = document.getElementById("btnConnect");
+            btnConnect.onclick = function () {
+                ws = new WebSocket('wss://' + window.location.host + '/phone');
+                ws.onopen = function() {
+                    var msg = {
+                        name: document.getElementById('name').value,
+                        state: "initial",
+                        date: Date.now()
+                    };
+                    ws.send(JSON.stringify(msg));
+                }
+
+                // Write message on receive
+                ws.onmessage = function(e) {
+                    console.log("Received:",e);
+                    //document.getElementById('output').innerHTML += "Received: " + e.data + "<br>";
+                    var obj = JSON.parse(e.data);
+                    switch (obj.state) {
+                        case "connected":
+                            document.body.style.background = 'green';
+                            break;
+                        case "running":
+                            document.getElementById('heart').style.visibility='visible';
+                            break;
+                        case "stopped":
+                            document.getElementById('heart').style.visibility='hidden';
+                            break;
+                    };
+                };
+                ws.onclose = function() {
+                    document.body.style.background = 'white';
+                };
+            }
+        }
+
+
+        function senddata(state) {
+            // Construct a msg object containing the data the server needs to process the message from the chat client.
+            var msg = {
+                name: document.getElementById('name').value,
+                state: state,
+                date: Date.now()
+            };
+
+            ws.send(JSON.stringify(msg));
+            console.log("Sending:",msg);
+            //document.getElementById('output').innerHTML += "Sent: " + JSON.stringify(msg) + "<br>";
+        }
+    </script>
+  </body>
+</html>
+

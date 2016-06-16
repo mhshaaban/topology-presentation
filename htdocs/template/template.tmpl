@@ -1,0 +1,13 @@
+blabla
+<% if (target.name != "") { %> 
+<h2><code> <%=target.name%> </code></h2>
+<%};%>
+
+    <% if (target.content.description != "") { %> 
+                <%=viewMD(target.description)%>
+    <%};%>
+    full text
+    <% if (target.content.full_text != "") { %> 
+                <%=viewMD(target.full_text)%>
+    <%};%>
+
