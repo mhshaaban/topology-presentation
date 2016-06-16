@@ -1,156 +1,176 @@
+
 <!doctype html>
 <html lang="en">
-
   <head>
     <meta charset="utf-8">
-
-    <title>Topology made easy</title>
-
-    <meta name="description" content="A framework for easily creating beautiful presentations using HTML">
-    <meta name="author" content="Hakim El Hattab">
-
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
+    <title>D3.js Data Visualization</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
     <link rel="stylesheet" href="css/reveal.css">
-    <link rel="stylesheet" href="css/theme/black.css" id="theme">
-
-    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="css/theme/solarized.css" id="theme">
     <link rel="stylesheet" href="lib/css/zenburn.css">
-
-    <!-- Printing and PDF exports -->
     <script>
-var link = document.createElement( 'link' );
-link.rel = 'stylesheet';
-link.type = 'text/css';
-link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
-document.getElementsByTagName( 'head' )[0].appendChild( link );
+if( window.location.search.match( /print-pdf/gi ) ) {
+  var link = document.createElement( 'link' );
+  link.rel = 'stylesheet';
+  link.type = 'text/css';
+  link.href = 'css/print/pdf.css';
+  document.getElementsByTagName( 'head' )[0].appendChild( link );
+}
     </script>
 
     <script src="lib/js/head.min.js"></script>
     <script src="js/reveal.js"></script>
+
+
     <script src="/js/qrcode.min.js"></script>
-    <script src="js/d3.v3.min.js"></script>
-    <script src="js/jquery.min.js"></script>
-    <script src="lib/js/lodash.js"></script>
+    <script src="/js/d3.v3.min.js"></script>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/lib/js/lodash.min.js"></script>
+    <style>
+.chart rect {
+  fill: steelblue;
+}
+                        .chart text {
+                          fill: white;
+                          font: 10px sans-serif;
+                          text-anchor: end;
+                        }
 
+                        .axis text {
+                          font: 10px sans-serif;
+                        }
 
-    <!--[if lt IE 9]>
-      <script src="lib/js/html5shiv.js"></script>
-      <![endif]-->
+                        .axis path,
+                        .axis line {
+                          fill: none;
+                          stroke: #000;
+                          shape-rendering: crispEdges;
+                        }
+    </style>					
   </head>
 
   <body>
-
     <div class="reveal">
-
-      <!-- Any section element inside of this container is displayed as a slide -->
       <div class="slides">
-        <section data-state="slide1">
-          Please join the keynote: 
+
+
+        <section data-state='cover'>
+          <h2>What about Topology</h2>
+          <h3>Olivier Wulveryck</h3>
+          <p><small>June 1, 2016</small></p>
+        </section>
+
+        <section data-state="randomcircles" id="randomcircles">
+          <h2>Please join the keynote:</h2>
           <div>
             <a href="http://localhost" id="demourl">url</a>
           </div>
           <center>
             <div id="qrcode"></div>
-            <div id="slide1d3container"></div>
           </center>
-     <!-- Animation for the first slide -->
-     <script type="text/javascript">
-Reveal.addEventListener( 'slide1', function() {
 
-  var width = 960,
-  height = 500;
+          <div id="randomcirclescontainer"></div>
+          <script type="text/javascript">
+Reveal.addEventListener( 'randomcircles', function() {
+  var demourl = window.location.protocol +'//'+ window.location.hostname+':'+window.location.port;
+  document.getElementById("demourl").innerHTML = demourl;
+  document.getElementById("demourl").href = demourl;
+  new QRCode(document.getElementById("qrcode"), demourl);
 
-  var color = d3.scale.category20();
 
-  var force = d3.layout.force()
-    .charge(-120)
-    .linkDistance(30)
-    .size([width, height]);
-  var svg = d3.select("#slide1d3container").selectAll('svg').data([0]).enter().append("svg")
-    .attr("width", width)
-    .attr("height", height);
+  var height = 250, width = 800;
+  var svg = d3.select("#randomcirclescontainer").selectAll('svg').data([0]).enter().append("svg")
+    svg.attr( {width: width, height: height });
+  var data = new Array(250);
 
-  d3.json("miserables.json", function(error, graph) {
-    if (error) throw error;
+  function randomizeData() {
+    for (var i = data.length - 1; i >= 0; i--) {
+      data[i] = { id: Math.random(), x: Math.random()*width, y: Math.random()*height }
+    };
+  }
 
-    force
-      .nodes(graph.nodes)
-      .links(graph.links)
-      .start();
+  update();
 
-    var link = svg.selectAll(".link")
-      .data(graph.links)
-      .enter().append("line")
-      .attr("class", "link")
-      .style("stroke-width", function(d) { return Math.sqrt(d.value); });
+  function update() {
+    randomizeData();
 
-    var node = svg.selectAll(".node")
-      .data(graph.nodes)
-      .attr("class", "node")
-      .attr("r", 5)
-      .style("fill", function(d) { return color(d.group); })
-      .call(force.drag);
+    var circles = svg.selectAll('circle').data(data); 
 
-    node.append("title")
-      .text(function(d) { return d.name; });
+    circles
+      .transition().duration(500)
+      .attr('r', 3)
+      .transition().duration(1500)
+      .attr('cx', function(d) { return d.x; })
+      .attr('cy', function(d) { return d.y; })
+      .transition().duration(500)
+      .attr('r', 8)
 
-    force.on("tick", function() {
-      link.attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
+      circles.enter().append('circle')
+      .attr('cx', function(d) { return d.x; })
+      .attr('cy', function(d) { return d.y; })
+      .attr( { r: 8, fill: 'green' });
+  }
 
-      node.attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; });
-    });
-  });
+  svg.on('click', update);
 
-});
-     </script>
+  //var updateEvent = setInterval(update, 2000);
 
-     <aside class="notes">
+  // Reveal.addEventListener( 'slidechanged', function(event) {
+  // 	console.log(event.previousSlide.id);
+  // 	if (event.previousSlide.id !== 'randomcircles') return;
+  // 	clearInterval(updateEvent);
+  // });
 
-     </aside>
+} );
+
+          </script>					
         </section>
+        
         <section>
-          What is a topology?
+          <h2>The End</h2>
         </section>
 
       </div>
-
     </div>
 
-
     <script>
-var demourl = window.location.protocol +'//'+ window.location.hostname+':'+window.location.port;
-document.getElementById("demourl").innerHTML = demourl;
-document.getElementById("demourl").href = demourl;
-new QRCode(document.getElementById("qrcode"), demourl);
 
-// More info https://github.com/hakimel/reveal.js#configuration
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
 Reveal.initialize({
   controls: true,
   progress: true,
   history: true,
   center: true,
 
-  transition: 'slide', // none/fade/slide/convex/concave/zoom
+  // width: 1024,
+  // height: 768,
+  // margin: 0.0,
+  // minScale: 1.0,
+  // maxScale: 1.0,
 
-  // More info https://github.com/hakimel/reveal.js#dependencies
+  theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+  transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+  // Parallax scrolling
+  // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+  // parallaxBackgroundSize: '2100px 900px',
+
+  // Optional libraries used to extend on reveal.js
   dependencies: [
   { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
   { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
   { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
   { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
-  { src: 'plugin/zoom-js/zoom.js', async: true },
-  { src: 'plugin/notes/notes.js', async: true }
+  { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+  { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
   ]
 });
-
+// d3.select(self.frameElement).style("height", "768px");
     </script>
+
   </body>
 </html>
+
