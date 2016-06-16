@@ -57,7 +57,7 @@ var upgrader = websocket.Upgrader{} // use default options
 
 var communicationChannel = make(chan communication)
 
-func orchestrator(w http.ResponseWriter, r *http.Request) {
+func slideJoin(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
@@ -69,26 +69,39 @@ func orchestrator(w http.ResponseWriter, r *http.Request) {
 		Channel chan msg
 		State   string
 	}
-	var attendee = make(map[string]tempo)
+	//	var attendee = make(map[string]tempo)
 	for {
 		message := <-communicationChannel
 		log.Println("message received ", message)
-		attendee[message.msg.Name] = tempo{Channel: message.Chan, State: message.msg.State}
-		for att, temp := range attendee {
-			go func(att string, temp tempo) {
-				channel := temp.Channel
-				state := temp.State
-				log.Println(state)
-				if state == "start" {
-					log.Printf("Sending to %v on channel %v", att, channel)
-					channel <- msg{"A", "running"}
-				}
-				if state == "stop" {
-					log.Printf("Sending to %v on channel %v", att, channel)
-					channel <- msg{"A", "stopped"}
-				}
-			}(att, temp)
+		type nodes struct {
+			ID        int    `json:"id"`
+			CreatedAt string `json:"created_at"`
+			Amount    int    `json:"amount"`
 		}
+
+		//err = websocket.WriteJSON(c, nodes{message.msg.Name, "Mon May 13 2013", 2000})
+		err = websocket.WriteJSON(c, nodes{1, "Mon May 13 2013", 2000})
+		if err != nil {
+			log.Println(err)
+		}
+		/*
+			attendee[message.msg.Name] = tempo{Channel: message.Chan, State: message.msg.State}
+			for att, temp := range attendee {
+				go func(att string, temp tempo) {
+					channel := temp.Channel
+					state := temp.State
+					log.Println(state)
+					if state == "start" {
+						log.Printf("Sending to %v on channel %v", att, channel)
+						channel <- msg{"A", "running"}
+					}
+					if state == "stop" {
+						log.Printf("Sending to %v on channel %v", att, channel)
+						channel <- msg{"A", "stopped"}
+					}
+				}(att, temp)
+			}
+		*/
 	}
 }
 

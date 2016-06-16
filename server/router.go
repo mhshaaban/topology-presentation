@@ -33,9 +33,9 @@ func NewRouter() *mux.Router {
 
 	router.
 		Methods("GET").
-		Path("/orchestrator").
+		Path("/slideJoin").
 		Name("WebSocket").
-		HandlerFunc(orchestrator)
+		HandlerFunc(slideJoin)
 	router.
 		Methods("GET").
 		Path("/phone").

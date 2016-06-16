@@ -22,7 +22,7 @@ import (
 	"os"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/owulveryck/likeotron/server"
+	"github.com/owulveryck/topology-presentation/server"
 )
 
 type configuration struct {
