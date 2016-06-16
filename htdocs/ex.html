@@ -1,0 +1,162 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>D3.js Data Visualization</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/solarized.css" id="theme">
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+    <script>
+if( window.location.search.match( /print-pdf/gi ) ) {
+  var link = document.createElement( 'link' );
+  link.rel = 'stylesheet';
+  link.type = 'text/css';
+  link.href = 'css/print/pdf.css';
+  document.getElementsByTagName( 'head' )[0].appendChild( link );
+}
+    </script>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script src="/js/d3.v3.min.js"></script>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/lib/js/lodash.min.js"></script>
+    <style>
+.chart rect {
+  fill: steelblue;
+}
+                        .chart text {
+                          fill: white;
+                          font: 10px sans-serif;
+                          text-anchor: end;
+                        }
+
+                        .axis text {
+                          font: 10px sans-serif;
+                        }
+
+                        .axis path,
+                        .axis line {
+                          fill: none;
+                          stroke: #000;
+                          shape-rendering: crispEdges;
+                        }
+    </style>					
+  </head>
+
+  <body>
+    <div class="reveal">
+      <div class="slides">
+
+
+        <section data-state='cover'>
+          <h2>D3.js Data Visualization</h2>
+          <h3>Central PA Open Source Conference</h3>
+          <p><small>November 1, 2014</small></p>
+        </section>
+
+        <section data-state="randomcircles" id="randomcircles">
+          <h2>Chained Transitions</h2>
+          <div id="randomcirclescontainer"></div>
+          <script type="text/javascript">
+Reveal.addEventListener( 'randomcircles', function() {
+
+  var height = 250, width = 800;
+  var svg = d3.select("#randomcirclescontainer").selectAll('svg').data([0]).enter().append("svg")
+    svg.attr( {width: width, height: height });
+  var data = new Array(250);
+
+  function randomizeData() {
+    for (var i = data.length - 1; i >= 0; i--) {
+      data[i] = { id: Math.random(), x: Math.random()*width, y: Math.random()*height }
+    };
+  }
+
+  update();
+
+  function update() {
+    randomizeData();
+
+    var circles = svg.selectAll('circle').data(data); 
+
+    circles
+      .transition().duration(500)
+      .attr('r', 3)
+      .transition().duration(1500)
+      .attr('cx', function(d) { return d.x; })
+      .attr('cy', function(d) { return d.y; })
+      .transition().duration(500)
+      .attr('r', 8)
+
+      circles.enter().append('circle')
+      .attr('cx', function(d) { return d.x; })
+      .attr('cy', function(d) { return d.y; })
+      .attr( { r: 8, fill: 'green' });
+  }
+
+  svg.on('click', update);
+
+  //var updateEvent = setInterval(update, 2000);
+
+  // Reveal.addEventListener( 'slidechanged', function(event) {
+  // 	console.log(event.previousSlide.id);
+  // 	if (event.previousSlide.id !== 'randomcircles') return;
+  // 	clearInterval(updateEvent);
+  // });
+
+} );
+
+          </script>					
+        </section>
+        
+        <section>
+          <h2>The End</h2>
+        </section>
+
+      </div>
+    </div>
+
+    <script>
+
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+  controls: true,
+  progress: true,
+  history: true,
+  center: true,
+
+  // width: 1024,
+  // height: 768,
+  // margin: 0.0,
+  // minScale: 1.0,
+  // maxScale: 1.0,
+
+  theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+  transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+  // Parallax scrolling
+  // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+  // parallaxBackgroundSize: '2100px 900px',
+
+  // Optional libraries used to extend on reveal.js
+  dependencies: [
+  { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+  { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+  { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+  { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+  { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+  { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+  ]
+});
+// d3.select(self.frameElement).style("height", "768px");
+    </script>
+
+  </body>
+</html>
+

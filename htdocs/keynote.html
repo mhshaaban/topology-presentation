@@ -29,6 +29,14 @@ link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' 
 document.getElementsByTagName( 'head' )[0].appendChild( link );
     </script>
 
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+    <script src="/js/qrcode.min.js"></script>
+    <script src="js/d3.v3.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="lib/js/lodash.js"></script>
+
+
     <!--[if lt IE 9]>
       <script src="lib/js/html5shiv.js"></script>
       <![endif]-->
@@ -40,19 +48,73 @@ document.getElementsByTagName( 'head' )[0].appendChild( link );
 
       <!-- Any section element inside of this container is displayed as a slide -->
       <div class="slides">
-        <section>
+        <section data-state="slide1">
           Please join the keynote: 
           <div>
             <a href="http://localhost" id="demourl">url</a>
           </div>
           <center>
             <div id="qrcode"></div>
-
+            <div id="slide1d3container"></div>
           </center>
+     <!-- Animation for the first slide -->
+     <script type="text/javascript">
+Reveal.addEventListener( 'slide1', function() {
 
-          <aside class="notes">
+  var width = 960,
+  height = 500;
 
-          </aside>
+  var color = d3.scale.category20();
+
+  var force = d3.layout.force()
+    .charge(-120)
+    .linkDistance(30)
+    .size([width, height]);
+  var svg = d3.select("#slide1d3container").selectAll('svg').data([0]).enter().append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+  d3.json("miserables.json", function(error, graph) {
+    if (error) throw error;
+
+    force
+      .nodes(graph.nodes)
+      .links(graph.links)
+      .start();
+
+    var link = svg.selectAll(".link")
+      .data(graph.links)
+      .enter().append("line")
+      .attr("class", "link")
+      .style("stroke-width", function(d) { return Math.sqrt(d.value); });
+
+    var node = svg.selectAll(".node")
+      .data(graph.nodes)
+      .attr("class", "node")
+      .attr("r", 5)
+      .style("fill", function(d) { return color(d.group); })
+      .call(force.drag);
+
+    node.append("title")
+      .text(function(d) { return d.name; });
+
+    force.on("tick", function() {
+      link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+      node.attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; });
+    });
+  });
+
+});
+     </script>
+
+     <aside class="notes">
+
+     </aside>
         </section>
         <section>
           What is a topology?
@@ -62,9 +124,6 @@ document.getElementsByTagName( 'head' )[0].appendChild( link );
 
     </div>
 
-    <script src="lib/js/head.min.js"></script>
-    <script src="js/reveal.js"></script>
-    <script src="/js/qrcode.min.js"></script>
 
     <script>
 var demourl = window.location.protocol +'//'+ window.location.hostname+':'+window.location.port;
@@ -93,6 +152,5 @@ Reveal.initialize({
 });
 
     </script>
-
   </body>
 </html>
