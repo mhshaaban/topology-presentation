@@ -11,7 +11,16 @@ Reveal.addEventListener( 'slideJoin', function() {
   (function() {
     JSONData = {
       "nodes": [
-        {"name": "Presenter", id:0},
+        {
+          "name": "Android", 
+          "id":0,
+          "icon": "/img/android-phone-color.png"
+        },
+        {
+          "name": "iPhone", 
+          "id":1,
+          "icon": "/img/iphone-phone-color.png"
+        },
       ],
       "links": [
         {"source":0,"target":0}
@@ -51,7 +60,7 @@ Reveal.addEventListener( 'slideJoin', function() {
         .attr("class", "link");
 
       node.append("image")
-        .attr("xlink:href", "https://cdn0.iconfinder.com/data/icons/phone-icons-3/154/smartphone-128.png")
+        .attr("xlink:href", function(d) { return d.icon; })
         .attr("x", -8)
         .attr("y", -8)
         .attr("width", 32)

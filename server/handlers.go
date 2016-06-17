@@ -37,14 +37,15 @@ type message struct {
 	Date   time.Time `json:"-"`
 }
 
-type msg struct {
-	Name  string `json:"name"`
-	State string `json:"state"`
+type phoneMessage struct {
+	Name    string `json:"name"`
+	Device  string `json:"device"`
+	Message string `json:"message"`
 }
 
 type communication struct {
-	msg  msg
-	Chan chan msg
+	msg  phoneMessage
+	Chan chan phoneMessage
 }
 
 var topics map[string][]int64
@@ -66,7 +67,7 @@ func slideJoin(w http.ResponseWriter, r *http.Request) {
 	}
 	defer c.Close()
 	type tempo struct {
-		Channel chan msg
+		Channel chan phoneMessage
 		State   string
 	}
 	//	var attendee = make(map[string]tempo)
@@ -119,9 +120,9 @@ func phone(w http.ResponseWriter, r *http.Request) {
 	defer c.Close()
 
 	// Read incoming message and pass it to the hub
-	var channel = make(chan msg)
+	var channel = make(chan phoneMessage)
 	// launch a goroutine and wait
-	go func(channel chan msg) {
+	go func(channel chan phoneMessage) {
 		for {
 			response := <-channel
 			log.Println("about to send ", response)
@@ -134,12 +135,12 @@ func phone(w http.ResponseWriter, r *http.Request) {
 	}(channel)
 	for {
 
-		var message msg
+		var message phoneMessage
 		err := websocket.ReadJSON(c, &message)
 		if err != nil {
 			log.Println("Unable to read message", err)
 		} else {
-			log.Printf("=> %v is talking", message.Name)
+			log.Printf("=> %v is talking (%v)", message.Name, message)
 			communicationChannel <- communication{msg: message, Chan: channel}
 			log.Printf("=> Advertized ")
 
