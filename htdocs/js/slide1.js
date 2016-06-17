@@ -3,8 +3,8 @@ document.getElementById("demourl").innerHTML = demourl;
 document.getElementById("demourl").href = demourl;
 new QRCode(document.getElementById("qrcode"), {
   text: demourl,
-  width: 128,
-  height: 128,
+//  width: 150,
+//  height: 150,
 });
 
 Reveal.addEventListener( 'slideJoin', function() {

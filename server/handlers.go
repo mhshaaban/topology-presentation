@@ -88,7 +88,7 @@ func slideJoin(w http.ResponseWriter, r *http.Request) {
 			Nodes []node `json:"nodes"`
 			Links []link `json:"links"`
 		}
-		var ios = regexp.MustCompile(`(?i).*ios.*`)
+		var ios = regexp.MustCompile(`(?i).*ios|iphone.*`)
 		var android = regexp.MustCompile(`(?i).*android.*`)
 		var icon string
 		switch {
