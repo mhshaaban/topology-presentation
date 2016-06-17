@@ -70,6 +70,7 @@ func slideJoin(w http.ResponseWriter, r *http.Request) {
 		State   string
 	}
 	//	var attendee = make(map[string]tempo)
+	nodeid := 8
 	for {
 		message := <-communicationChannel
 		log.Println("message received ", message)
@@ -80,7 +81,10 @@ func slideJoin(w http.ResponseWriter, r *http.Request) {
 		}
 
 		//err = websocket.WriteJSON(c, nodes{message.msg.Name, "Mon May 13 2013", 2000})
-		err = websocket.WriteJSON(c, nodes{1, "Mon May 13 2013", 2000})
+		nodeid = nodeid + 1
+		date := time.Now()
+		res := date.Format("Mon Jan 1 2006")
+		err = websocket.WriteJSON(c, nodes{nodeid, res, 2000 + nodeid})
 		if err != nil {
 			log.Println(err)
 		}
