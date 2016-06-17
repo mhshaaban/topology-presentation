@@ -107,10 +107,12 @@ func slideJoin(w http.ResponseWriter, r *http.Request) {
 				link{0, 0},
 			},
 		}
+		log.Println("Sending", myreply)
 		err = websocket.WriteJSON(c, &myreply)
 		if err != nil {
 			log.Println(err)
 		}
+		log.Println("sent", myreply)
 		/*
 			attendee[message.msg.Name] = tempo{Channel: message.Chan, State: message.msg.State}
 			for att, temp := range attendee {

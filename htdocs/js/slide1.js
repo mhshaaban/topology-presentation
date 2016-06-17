@@ -83,8 +83,9 @@ Reveal.addEventListener( 'slideJoin', function() {
     ws.onmessage = function(evt) {
       // append new data from the socket
       var elements = JSON.parse(evt.data);
-      alert(elements.nodes);
-      JSONData.nodes.push(elements.nodes);
+      console.log(JSON.stringify(elements));
+      JSONData.nodes = JSONData.nodes.concat(elements.nodes);
+      console.log(JSON.stringify(JSONData));
       refreshGraph();
     };
 
