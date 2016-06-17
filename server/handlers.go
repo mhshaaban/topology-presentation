@@ -107,7 +107,7 @@ func slideJoin(w http.ResponseWriter, r *http.Request) {
 				link{0, 0},
 			},
 		}
-		err = websocket.WriteJSON(c, myreply)
+		err = websocket.WriteJSON(c, &myreply)
 		if err != nil {
 			log.Println(err)
 		}

@@ -12,14 +12,9 @@ Reveal.addEventListener( 'slideJoin', function() {
     JSONData = {
       "nodes": [
         {
-          "name": "Android", 
+          "name": "Presenter", 
           "id":0,
-          "icon": "/img/android-phone-color.png"
-        },
-        {
-          "name": "iPhone", 
-          "id":1,
-          "icon": "/img/iphone-phone-color.png"
+          "icon": "/img/laptop.png"
         },
       ],
       "links": [
@@ -87,7 +82,9 @@ Reveal.addEventListener( 'slideJoin', function() {
 
     ws.onmessage = function(evt) {
       // append new data from the socket
-      JSONData.push(JSON.parse(evt.data));
+      var elements = JSON.parse(evt.data);
+      alert(elements.nodes);
+      JSONData.nodes.push(elements.nodes);
       refreshGraph();
     };
 
