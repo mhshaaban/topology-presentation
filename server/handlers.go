@@ -72,6 +72,7 @@ func slideJoin(w http.ResponseWriter, r *http.Request) {
 		State   string
 	}
 	//	var attendee = make(map[string]tempo)
+	nodeid := 0
 	for {
 		message := <-communicationChannel
 		log.Println("message received ", message)
@@ -99,9 +100,10 @@ func slideJoin(w http.ResponseWriter, r *http.Request) {
 		default:
 			icon = "/img/smartphone.png"
 		}
+		nodeid = nodeid + 1
 		myreply := reply{
 			[]node{
-				node{message.msg.Name, 0, icon},
+				node{message.msg.Name, nodeid, icon},
 			},
 			[]link{
 				link{0, 0},
