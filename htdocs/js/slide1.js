@@ -6,20 +6,18 @@ new QRCode(document.getElementById("qrcode"), {
   width: 128,
   height: 128,
 });
-JSONData = {
-  "nodes": [
-    {"name": "Olivier", id:1},
-    {"name": "toto", id: 2},
-    {"name": "titi", id: 3}
-  ],
-  "links": [
-    {"source":1,"target":2}
-  ]
-};
-
 
 Reveal.addEventListener( 'slideJoin', function() {
   (function() {
+    JSONData = {
+      "nodes": [
+        {"name": "Presenter", id:0},
+      ],
+      "links": [
+        {"source":0,"target":0}
+      ]
+    };
+
     //var color = d3.scale.category10();
 
     var width = 960,
@@ -56,12 +54,12 @@ Reveal.addEventListener( 'slideJoin', function() {
         .attr("xlink:href", "https://cdn0.iconfinder.com/data/icons/phone-icons-3/154/smartphone-128.png")
         .attr("x", -8)
         .attr("y", -8)
-        .attr("width", 16)
-        .attr("height", 16);
+        .attr("width", 32)
+        .attr("height", 32);
 
       node.append("text")
-        .attr("dx", 12)
-        .attr("dy", ".35em")
+        .attr("dx", 24)
+        .attr("dy", ".45em")
         .text(function(d) { return d.name; });
 
       force.on("tick", function() {
@@ -80,7 +78,7 @@ Reveal.addEventListener( 'slideJoin', function() {
 
     ws.onmessage = function(evt) {
       // append new data from the socket
-      data.push(JSON.parse(evt.data));
+      JSONData.push(JSON.parse(evt.data));
       refreshGraph();
     };
 
