@@ -75,13 +75,19 @@ func slideJoin(w http.ResponseWriter, r *http.Request) {
 	for {
 		message := <-communicationChannel
 		log.Println("message received ", message)
-		type nodes struct {
+		type node struct {
 			Name string `json:"name"`
 			ID   int    `json:"id"`
 			Icon string `json:"icon"`
 		}
-
-		//err = websocket.WriteJSON(c, nodes{message.msg.Name, "Mon May 13 2013", 2000})
+		type link struct {
+			Source int `json:"source"`
+			Target int `json:"target"`
+		}
+		type reply struct {
+			Nodes []node `json:"nodes"`
+			Links []link `json:"links"`
+		}
 		var ios = regexp.MustCompile(`(?i).*ios.*`)
 		var android = regexp.MustCompile(`(?i).*android.*`)
 		var icon string
@@ -93,7 +99,15 @@ func slideJoin(w http.ResponseWriter, r *http.Request) {
 		default:
 			icon = "/img/smartphone.png"
 		}
-		err = websocket.WriteJSON(c, nodes{message.msg.Name, 0, icon})
+		myreply := reply{
+			[]node{
+				node{message.msg.Name, 0, icon},
+			},
+			[]link{
+				link{0, 0},
+			},
+		}
+		err = websocket.WriteJSON(c, myreply)
 		if err != nil {
 			log.Println(err)
 		}
@@ -154,56 +168,4 @@ func phone(w http.ResponseWriter, r *http.Request) {
 
 		}
 	}
-}
-
-func progress(w http.ResponseWriter, r *http.Request) {
-	c, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Print("upgrade:", err)
-		return
-
-	}
-	defer c.Close()
-
-	for {
-
-		var message message
-		err := websocket.ReadJSON(c, &message)
-		if err != nil {
-			log.Println("Unable to read message", err)
-		} else {
-			log.Printf("=> message: \n==> Topic:%v\n==>Sender:%v\n==>Date:%v ", message.Topic, message.Sender, message.Date)
-		}
-
-		var increment int64
-		if message.Like {
-			increment = 1
-		} else {
-			increment = -1
-		}
-		if _, ok := topics[message.Topic]; !ok {
-			topics[message.Topic] = []int64{
-				1,
-				1,
-			}
-		}
-		topics[message.Topic] = []int64{
-			topics[message.Topic][0] + 1,
-			topics[message.Topic][1] + increment,
-		}
-		var response result
-		response.Topic = message.Topic
-		response.Date = time.Now()
-		response.Total = topics[message.Topic][0]
-		response.Score = float64(topics[message.Topic][1] * 100 / topics[message.Topic][0])
-		log.Println("about to send ", response)
-
-		err = websocket.WriteJSON(c, response)
-		if err != nil {
-			log.Println("Unable to send message", err)
-		}
-	}
-}
-
-func getJSON(w http.ResponseWriter, r *http.Request) {
 }

@@ -27,12 +27,6 @@ func NewRouter() *mux.Router {
 
 	router.
 		Methods("GET").
-		Path("/json/{jsonContent}").
-		Name("Dynamic").
-		HandlerFunc(getJSON)
-
-	router.
-		Methods("GET").
 		Path("/slideJoin").
 		Name("WebSocket").
 		HandlerFunc(slideJoin)
@@ -41,11 +35,6 @@ func NewRouter() *mux.Router {
 		Path("/phone").
 		Name("WebSocket").
 		HandlerFunc(phone)
-	router.
-		Methods("GET").
-		Path("/progress").
-		Name("WebSocket").
-		HandlerFunc(progress)
 
 	router.
 		Methods("GET").
