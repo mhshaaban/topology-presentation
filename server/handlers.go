@@ -17,6 +17,7 @@ package server
 import (
 	"log"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -71,21 +72,28 @@ func slideJoin(w http.ResponseWriter, r *http.Request) {
 		State   string
 	}
 	//	var attendee = make(map[string]tempo)
-	nodeid := 8
 	for {
 		message := <-communicationChannel
 		log.Println("message received ", message)
 		type nodes struct {
-			ID        int    `json:"id"`
-			CreatedAt string `json:"created_at"`
-			Amount    int    `json:"amount"`
+			Name string `json:"name"`
+			ID   int    `json:"id"`
+			Icon string `json:"icon"`
 		}
 
 		//err = websocket.WriteJSON(c, nodes{message.msg.Name, "Mon May 13 2013", 2000})
-		nodeid = nodeid + 1
-		date := time.Now()
-		res := date.Format("Mon Jan 1 2006")
-		err = websocket.WriteJSON(c, nodes{nodeid, res, 2000 + nodeid})
+		var ios = regexp.MustCompile(`(?i).*ios.*`)
+		var android = regexp.MustCompile(`(?i).*android.*`)
+		var icon string
+		switch {
+		case ios.MatchString(message.msg.Device):
+			icon = "/img/iphone-phone-color.png"
+		case android.MatchString(message.msg.Device):
+			icon = "/img/android-phone-color.png"
+		default:
+			icon = "/img/smartphone.png"
+		}
+		err = websocket.WriteJSON(c, nodes{message.msg.Name, 0, icon})
 		if err != nil {
 			log.Println(err)
 		}

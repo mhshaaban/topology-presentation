@@ -63,12 +63,12 @@ Reveal.addEventListener( 'slideJoin', function() {
         .attr("xlink:href", function(d) { return d.icon; })
         .attr("x", -8)
         .attr("y", -8)
-        .attr("width", 32)
-        .attr("height", 32);
+        .attr("width", 64)
+        .attr("height", 64);
 
       node.append("text")
-        .attr("dx", 24)
-        .attr("dy", ".45em")
+        .attr("dx", 54)
+        .attr("dy", ".05em")
         .text(function(d) { return d.name; });
 
       force.on("tick", function() {
