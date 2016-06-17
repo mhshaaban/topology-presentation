@@ -32,9 +32,9 @@ Reveal.addEventListener( 'slideJoin', function() {
       .attr("height", height);
 
     var force = d3.layout.force()
-      .charge(-100)
-      .distance(100)
-      .gravity(0.05)
+      .charge(-200)
+      .distance(300)
+      .gravity(0.01)
       .size([width, height]);
 
     var refreshGraph = function() {
