@@ -5,6 +5,7 @@
 package server
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -61,6 +62,7 @@ func (c *Conn) readPump(ID string) {
 			}
 			break
 		}
+
 		hubs.RLock()
 		hubs.h[ID].broadcast <- message
 		hubs.RUnlock()
@@ -94,12 +96,19 @@ func (c *Conn) writePump(ID string) {
 			if err != nil {
 				return
 			}
-			websocket.WriteJSON(c.ws, &message)
+			b, _ := json.Marshal(message)
+			w.Write(b)
+
+			//			websocket.WriteJSON(c.ws, &message)
 
 			// Add queued chat messages to the current websocket message.
 			n := len(c.send)
 			for i := 0; i < n; i++ {
-				websocket.WriteJSON(c.ws, <-c.send)
+				//websocket.WriteJSON(c.ws, <-c.send)
+				b, _ := json.Marshal(<-c.send)
+				w.Write([]byte{'\n'})
+
+				w.Write(b)
 				//w.Write(<-c.send)
 			}
 
@@ -119,7 +128,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	//Let's get the ID
 	vars := mux.Vars(r)
 	ID := vars["id"]
-	log.Println("=> Connection to %v", ID)
+	log.Printf("=> Connection to %v", ID)
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
@@ -127,15 +136,15 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	}
 	conn := &Conn{send: make(chan Message, 256), ws: ws}
 	if ID == "" {
-		log.Println("No ID provided, bailing out")
+		log.Printf("No ID provided, bailing out")
 		return
 	}
 	hubs.Lock()
 	if _, ok := hubs.h[ID]; ok {
-		log.Println("==> [%v] A hub alredy exist for ID %v", ID)
+		log.Printf("==> [%v] A hub alredy exist for this ID", ID)
 		hubs.h[ID].register <- conn
 	} else {
-		log.Println("==> [%v] Creating a new hub for ID %v", ID)
+		log.Printf("==> [%v] Creating a new hub", ID)
 		hubs.h[ID] = &Hub{
 			broadcast:   make(chan Message),
 			register:    make(chan *Conn),
