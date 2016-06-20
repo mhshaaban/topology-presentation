@@ -119,16 +119,23 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	//Let's get the ID
 	vars := mux.Vars(r)
 	ID := vars["id"]
+	log.Println("=> Connection to %v", ID)
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	conn := &Conn{send: make(chan Message, 256), ws: ws}
+	if ID == "" {
+		log.Println("No ID provided, bailing out")
+		return
+	}
 	hubs.Lock()
 	if _, ok := hubs.h[ID]; ok {
+		log.Println("==> [%v] A hub alredy exist for ID %v", ID)
 		hubs.h[ID].register <- conn
 	} else {
+		log.Println("==> [%v] Creating a new hub for ID %v", ID)
 		hubs.h[ID] = &Hub{
 			broadcast:   make(chan Message),
 			register:    make(chan *Conn),
