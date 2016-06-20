@@ -4,6 +4,7 @@ package server
 type Node struct {
 	Name   string `json:"name"`
 	UUID   string `json:"id"`
+	Device string `json:"device"`
 	Icon   string `json:"icon"`
 	Status string `json:"status"`
 }
@@ -16,7 +17,8 @@ type Link struct {
 
 //Message is the top envelop for message communication between nodes
 type Message struct {
-	UUID  string `json:"uuid"`
-	Nodes []Node `json:"nodes"`
-	Links []Link `json:"links"`
+	UUID    string `json:"id"`
+	Message string `json:"message"`
+	Nodes   []Node `json:"nodes"`
+	Links   []Link `json:"links"`
 }

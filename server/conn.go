@@ -55,13 +55,19 @@ func (c *Conn) readPump(ID string) {
 	c.ws.SetPongHandler(func(string) error { c.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
 		var message Message
-		err := websocket.ReadJSON(c.ws, &message)
+		//err := websocket.ReadJSON(c.ws, &message)
+		_, b, err := c.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
-				log.Printf("error: %v", err)
+				log.Printf("==> [%v] error: %v", ID, err)
 			}
 			break
 		}
+		err = json.Unmarshal(b, &message)
+		if err != nil {
+			log.Printf("==> [%v] Received message but cannot unmarshal it, %v", ID, err)
+		}
+		log.Printf("==> [%v] Received message: %v (%s)", ID, message, string(b))
 
 		hubs.RLock()
 		hubs.h[ID].broadcast <- message

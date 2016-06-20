@@ -1,13 +1,19 @@
 var ws;
 var state = 'initial';
-var f_guid = function() {
-  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-    return v.toString(16);
+function generateUUID(){
+  var d = new Date().getTime();
+  if(window.performance && typeof window.performance.now === "function"){
+    d += performance.now(); //use high-precision timer if available
+  }
+  var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = (d + Math.random()*16)%16 | 0;
+    d = Math.floor(d/16);
+    return (c=='x' ? r : (r&0x3|0x8)).toString(16);
   });
-};
-
-var guid = f_guid();
+  return uuid;
+}
+var guid = generateUUID();
+console.log(guid);
 
 var sessionID = Math.floor(1000 + Math.random() * 9000);
 sessionID = 1234;
@@ -15,6 +21,14 @@ sessionID = 1234;
 
 window.onload = function() {
   var btnConnect = document.getElementById("btnConnect");
+  btnDisConnect.onclick = function () {
+      ws.onclose = function () {}; // disable onclose handler first
+      ws.close()
+      $('#login').removeClass('hidden');
+      $('#main').addClass('hidden');
+      $('#footer').addClass('hidden');
+  };
+
   btnConnect.onclick = function () {
     var name = document.getElementById('name').value;
     var democode = document.getElementById('demoCode').value;
@@ -28,13 +42,20 @@ window.onload = function() {
 
       $('#login').addClass('hidden');
       $('#main').removeClass('hidden');
+      $('#footer').removeClass('hidden');
       console.log('hiding login');
       var msg = {
-        name: document.getElementById('name').value,
-        device: navigator.userAgent,
-        state: "initial",
-        date: Date.now()
+        id: guid,
+        message: 'hello',
+        nodes: [
+          {
+            name: name,  
+            id: guid,
+            device: navigator.userAgent
+          }
+        ]
       };
+      console.log("Sending"+JSON.stringify(msg));
       ws.send(JSON.stringify(msg));
     };
 
@@ -72,8 +93,10 @@ window.onload = function() {
       }
     };
     ws.onclose = function() {
-
-      $('#login').removeClass('hidden');
+      document.getElementById('btnDisConnect').innerHTML='Disconnect, click to reconnect';
+      $('#btnDisConnect').removeClass('btn-success');
+      $('#btnDisConnect').addClass('btn-warning');
+      
     };
   };
 };
