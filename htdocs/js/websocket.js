@@ -1,36 +1,15 @@
-var ws = new WebSocket('wss://' + window.location.host + '/progress');
+var sessionID = Math.floor(1000 + Math.random() * 9000);
 
+var ws = new WebSocket("wss://"+window.location.host+"/slideJoin");
 
-ws.onopen = function() {
-    var msg = {
-        topic:  "null",
-        sender: "null",
-        message: "Connection init",
-        date: Date.now()
-    };
-     
-    ws.send(JSON.stringify(msg));
-}
-
-// Write message on receive
-ws.onmessage = function(e) {
-    console.log("Received:",e);
-    //document.getElementById('output').innerHTML += "Received: " + e.data + "<br>";
-    var obj = JSON.parse(e.data);
-    dataval = obj.score;
-    $('.progress .amount').css("width", 100 - dataval + "%");
-    $('.progress').attr("data-amount", dataval);
+ws.onopen = function(evt) {
+  var msg = {
+    id: sessionID
+  };
+  ws.send(JSON.stringify(msg));
 };
 
-function senddata(like) {
-    // Construct a msg object containing the data the server needs to process the message from the chat client.
-    var msg = {
-        topic:  document.getElementById("topic").value,
-        like: like,
-        date: Date.now()
-    };
-     
-    ws.send(JSON.stringify(msg));
-    console.log("Sending:",msg);
-    //document.getElementById('output').innerHTML += "Sent: " + JSON.stringify(msg) + "<br>";
-}
+var refreshSlide1 = function() {
+  console.log('slide1');
+};
+

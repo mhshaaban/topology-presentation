@@ -6,7 +6,7 @@ new QRCode(document.getElementById("qrcode"), {
 //  width: 150,
 //  height: 150,
 });
-
+document.getElementById("codedemo").innerHTML  = sessionID;
 Reveal.addEventListener( 'slideJoin', function() {
   (function() {
     JSONData = {
@@ -37,7 +37,7 @@ Reveal.addEventListener( 'slideJoin', function() {
       .gravity(0.01)
       .size([width, height]);
 
-    var refreshGraph = function() {
+    var refreshSlide1 = function() {
       force
         .nodes(JSONData.nodes)
         .links(JSONData.links)
@@ -76,20 +76,17 @@ Reveal.addEventListener( 'slideJoin', function() {
       });
     };
 
-    var ws = new WebSocket("wss://"+window.location.host+"/slideJoin");
 
-    //var data = [];
+  ws.onmessage = function(evt) {
+    // append new data from the socket
+    var elements = JSON.parse(evt.data);
+    console.log(JSON.stringify(elements));
+    JSONData.nodes = JSONData.nodes.concat(elements.nodes);
+    console.log(JSON.stringify(JSONData));
+    refreshSlide1();
+  };
 
-    ws.onmessage = function(evt) {
-      // append new data from the socket
-      var elements = JSON.parse(evt.data);
-      console.log(JSON.stringify(elements));
-      JSONData.nodes = JSONData.nodes.concat(elements.nodes);
-      console.log(JSON.stringify(JSONData));
-      refreshGraph();
-    };
-
-    refreshGraph();
+  refreshSlide1();
 
   })();
 } );

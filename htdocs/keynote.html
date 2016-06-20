@@ -27,6 +27,7 @@ if( window.location.search.match( /print-pdf/gi ) ) {
     <script src="/js/d3.v3.min.js"></script>
     <script src="/js/jquery.min.js"></script>
     <script src="/lib/js/lodash.min.js"></script>
+    <script src="/js/websocket.js"></script>
     <style>
 
 .link {
@@ -42,6 +43,10 @@ if( window.location.search.match( /print-pdf/gi ) ) {
 .node.b { fill: #ff7f0e; }
 .node.c { fill: #2ca02c; }
 
+#qrcode {
+  margin-left: 0;
+  margin-top: 2%;
+}
     </style>
 </head>
 
@@ -80,18 +85,15 @@ if( window.location.search.match( /print-pdf/gi ) ) {
           </aside>
         </section>
 
-        <section data-state='slideJoin' data-background-size="slideJoin" data-background-image="/img/techsys.png" data-background-position="top">
+        <section data-state='slideJoin' data-background-image="/img/techsys.png" data-background-position="top">
           <h5>Un peu d'histoire</h5>
-          <div>
+          <div style='float:right'>
             <a href="http://localhost" id="demourl">url</a>
+            <p id="codedemo">code</p>
           </div>
-          <center>
-            <div id="qrcode"></div>
-          </center>
+          <div class='left' style='float:left' id="qrcode"></div>
 
-          <div id="demo" style="text-align: center;">
-          </div>
-          <div id="slideJoinContainer"></div>
+          <div id="demo" > </div>
           <script type="text/javascript" src="/js/slide1.js">
           </script>					
         </section>
@@ -138,7 +140,6 @@ Reveal.initialize({
 });
 // d3.select(self.frameElement).style("height", "768px");
     </script>
-
   </body>
 </html>
 
