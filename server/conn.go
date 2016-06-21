@@ -73,13 +73,17 @@ func (c *Conn) readPump(ID string) {
 		hubs.RLock()
 		topologies.Lock()
 		found := false
+		nodeID := 0
 		for i, node := range topologies.t[ID].Nodes {
 			if node.UUID == message.UUID {
 				topologies.t[ID].Nodes[i].Status = message.Status
 				found = true
 			}
+			nodeID = i + 1
 		}
+		// New node
 		if !found {
+
 			var ios = regexp.MustCompile(`(?i).*ios|iphone.*`)
 			var android = regexp.MustCompile(`(?i).*android.*`)
 			if message.Icon == "" {
@@ -94,8 +98,13 @@ func (c *Conn) readPump(ID string) {
 				}
 				message.Icon = icon
 			}
-
+			message.ID = nodeID
 			topologies.t[ID].Nodes = append(topologies.t[ID].Nodes, message)
+			// Add a link to the previous node
+			if nodeID >= 1 {
+				topologies.t[ID].Links = append(topologies.t[ID].Links, Link{Source: nodeID, Target: nodeID - 1})
+
+			}
 		}
 		if len(topologies.t[ID].Links) == 0 {
 			// Add a dummy link for d3.js

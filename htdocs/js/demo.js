@@ -57,6 +57,8 @@ var force = d3.layout.force()
   .size([width, height]);
 
 var refreshSlide1 = function() {
+  console.log('entering refreshSlide1');
+
   force
     .nodes(JSONData.nodes)
     .links(JSONData.links)
@@ -85,7 +87,11 @@ var refreshSlide1 = function() {
     .attr("dy", ".05em")
     .text(function(d) { return d.name; });
 
+
+  /*
   force.on("tick", function() {
+//    node.attr("cx", function(d) { return d.x; })
+//      .attr("cy", function(d) { return d.y; });
     link.attr("x1", function(d) { return d.source.x; })
       .attr("y1", function(d) { return d.source.y; })
       .attr("x2", function(d) { return d.target.x; })
@@ -93,8 +99,20 @@ var refreshSlide1 = function() {
 
     node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
   });
-};
+  */
+  force.on('tick', function(e) {
+      node.attr('transform', function(d, i) {
+      return 'translate('+ d.x +', '+ d.y +')';
+    });
 
+    link
+      .attr('x1', function(d) { return d.source.x; })
+      .attr('y1', function(d) { return d.source.y; })
+      .attr('x2', function(d) { return d.target.x; })
+      .attr('y2', function(d) { return d.target.y; });
+  });
+
+};
 
 ws.onmessage = function(evt) {
   // append new data from the socket
@@ -102,6 +120,23 @@ ws.onmessage = function(evt) {
   console.log(JSON.stringify(elements));
   //JSONData.nodes = JSONData.nodes.concat(elements.nodes);
   //JSONData.links = JSONData.links.concat(elements.links);
+  for (var j=0;j< elements.nodes.length; j++) {
+    console.log('looping for element'+j);
+    var found = false;
+    for (var i=0;i<JSONData.nodes.length;i++) {
+      // If match
+      if (elements.nodes[j].uuid === JSONData.nodes[i].uuid) {
+        console.log('Element found in the array '+elements.nodes[j].uuid+" "+JSONData.nodes[i].uuid);
+        JSONData.nodes[i].status = elements.nodes[i].status;
+        found = true;
+        break;
+      }
+    }
+    if (found === false) {
+      console.log('element not found, appending it');
+      JSONData.nodes = JSONData.nodes.concat(elements.nodes[j]);
+    }
+  }
   JSONData.nodes = elements.nodes;
   JSONData.links = elements.links;
   console.log(JSON.stringify(JSONData));
