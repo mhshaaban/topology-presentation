@@ -26,6 +26,7 @@ if( window.location.search.match( /print-pdf/gi ) ) {
     <script src="/js/qrcode.min.js"></script>
     <script src="/js/d3.v3.min.js"></script>
     <script src="/js/jquery.min.js"></script>
+    <script src="/js/timeframe.js"></script>
     <script src="/lib/js/lodash.min.js"></script>
     <script src="/js/websocket.js"></script>
     <style>
@@ -56,16 +57,16 @@ if( window.location.search.match( /print-pdf/gi ) ) {
 
 
         <section data-state='cover' data-background-size="cover" data-background-image="/img/techsys.png" data-background-position="top">
-          <h2>Anticiper l'avenir...</h2>
+          <h2>To the infinity and beyond...</h2>
           <blockquote cite="http://searchservervirtualization.techtarget.com/definition/Our-Favorite-Technology-Quotations">
-            &ldquo;Sois le changement que tu veux voir dans le monde. - Ghandi&rdquo;
+            &ldquo;Be the change you want to see in the world. - Ghandi&rdquo;
           </blockquote>
-          <h5>Techsys : Expertises et Innovations</h5>
+          <h5>Techsys : Expertise and Innovation</h5>
           <p><small>June 1, 2016</small></p>
         </section>
 
         <section data-state='slideDream' data-background-size="slideDream" data-background-image="/img/techsys.png" data-background-position="top">
-          <h2>Ce en quoi nous croyons</h2>
+          <h2>Why innovating?</h2>
           <blockquote cite="http://searchservervirtualization.techtarget.com/definition/Our-Favorite-Technology-Quotations">
             &ldquo;I have a dream... - Martin Luther King&rdquo;
           </blockquote>
@@ -87,7 +88,7 @@ if( window.location.search.match( /print-pdf/gi ) ) {
 
         <section>
           <section data-state='slideJoin' data-background-image="/img/techsys.png" data-background-position="top">
-            <h5>Un peu d'histoire</h5>
+            <h5>A brief history of systems engineering</h5>
             <div style='float:right'>
               <a href="http://localhost" id="demourl">url</a>
               <p id="codedemo">code</p>
@@ -104,6 +105,20 @@ if( window.location.search.match( /print-pdf/gi ) ) {
         </section>
 
         <section data-background-image="/img/techsys.png" data-background-position="top">
+          <h1>We belive...</h1>
+          <ul>
+            <li>TCO of digital plateform shall and should not increase anymore.</li>
+            <li>Time-to-market will go lower and lower</li>
+          </ul>
+          <h2>but</h2>
+          <ul>
+            <li>The value add of IT staff will increase</li>
+            <li>Production management will be splitted in execution driving, and automation developpement</li>
+            <li>Mutation from pet to cattle will go on</li>
+            <li>Security will be more than ever in every mind</li>
+          </ul>
+        </section>
+        <section data-background-image="/img/techsys.png" data-background-position="top">
           <h1>We believe...</h1>
           <h2>in the GAFAN Model for infrastructure</h2>
           <ul>
@@ -111,6 +126,40 @@ if( window.location.search.match( /print-pdf/gi ) ) {
             <li>Google's cloud plateform, for cloud native apps, in their containers systems</li>
             <li><a href="http://techblog.netflix.com/2011/07/netflix-simian-army.html">The Netflix Simian Army</a></li>
           </ul>
+          <h2>in smart automation</h2>
+          Smart automation is a key of success in company's digital transformation
+        </section>
+        <section data-state='timeframe' data-background-image="/img/techsys.png" data-background-position="top">
+          <h3>Evolution is already on its way</h3>
+          <div id="timeframe"></div>
+          <script>
+Reveal.addEventListener( 'timeframe', function() {
+  var t = Timeframe("#timeframe");
+  var starWarsFilms = {
+    name: "Star Wars Films",
+    color: "#000000",
+    events: [
+    {
+      name: "A New Hope",
+      date: "1977-05-25"
+    },
+    {
+      name: "The Empire Strikes Back",
+      date: "1980-05-21"
+    },
+    {
+      date: "1983-05-25"
+    }
+    ]
+  };
+
+  t.addCategory(starWarsFilms)
+    .start("1975-01-01")
+    .end("1985-01-01")
+    .draw();
+} );
+
+          </script>
         </section>
         <section>
           <h2>The End</h2>
