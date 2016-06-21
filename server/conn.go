@@ -20,7 +20,7 @@ const (
 	writeWait = 10 * time.Second
 
 	// Time allowed to read the next pong message from the peer.
-	pongWait = 60 * time.Second
+	pongWait = 60 * time.Minute
 
 	// Send pings to peer with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
@@ -69,6 +69,9 @@ func (c *Conn) readPump(ID string) {
 			log.Printf("==> [%v] Received message but cannot unmarshal it, %v", ID, err)
 		}
 		log.Printf("==> [%v] Received message: %v (%s)", ID, message, string(b))
+		if message.Status == "pong" {
+			continue
+		}
 
 		hubs.RLock()
 		topologies.Lock()
@@ -77,6 +80,21 @@ func (c *Conn) readPump(ID string) {
 		for i, node := range topologies.t[ID].Nodes {
 			if node.UUID == message.UUID {
 				topologies.t[ID].Nodes[i].Status = message.Status
+				switch message.Status {
+				case "initial":
+					message.Color = "black"
+				case "configured":
+					message.Color = "cyan"
+				case "started":
+					message.Color = "green"
+				case "stopped":
+					message.Color = "orange"
+				case "deleted":
+					message.Color = "red"
+				default:
+					message.Color = "black"
+				}
+				topologies.t[ID].Nodes[i].Color = message.Color
 				found = true
 			}
 			nodeID = i + 1
@@ -105,6 +123,11 @@ func (c *Conn) readPump(ID string) {
 				topologies.t[ID].Links = append(topologies.t[ID].Links, Link{Source: nodeID, Target: nodeID - 1})
 
 			}
+		}
+		if message.Status == "error" {
+			topologies.t[ID].Message = "error"
+		} else {
+			topologies.t[ID].Message = "info"
 		}
 		if len(topologies.t[ID].Links) == 0 {
 			// Add a dummy link for d3.js
@@ -165,7 +188,7 @@ func (c *Conn) writePump(ID string) {
 				return
 			}
 		case <-ticker.C:
-			if err := c.write(websocket.PingMessage, Message{}); err != nil {
+			if err := c.write(websocket.PingMessage, Message{Message: "ping"}); err != nil {
 				return
 			}
 		}

@@ -17,7 +17,7 @@ console.log(guid);
 
 var status = "initial";
 
-
+var id = 0;
 
 
 window.onload = function() {
@@ -32,23 +32,27 @@ window.onload = function() {
   btnCreate.onclick = function() {
     $("#heart").removeClass("hidden");
     status = "created";
+    senddata(status);
   };
   btnConfigure.onclick = function() {
     if (status == "created") {
       $("#heartimg").removeClass("sepia");
       status = "configured";
+      senddata(status);
     }
   };
   btnStart.onclick = function() {
     if (status == "configured") {
       $("#heartimg").addClass("bottom");
       status = "started";
+      senddata(status);
     }
   };
   btnStop.onclick = function() {
     if (status == "started") {
       $("#heartimg").removeClass("bottom");
       status = "stopped";
+      senddata(status);
     }
   };
   btnDelete.onclick = function() {
@@ -56,6 +60,7 @@ window.onload = function() {
       $("#heart").addClass("hidden");
       $("#heartimg").addClass("sepia");
       status= "initial"; 
+      senddata(status);
     }
   };
 
@@ -98,6 +103,22 @@ window.onload = function() {
       console.log("Received:",e);
       //document.getElementById('output').innerHTML += "Received: " + e.data + "<br>";
       var obj = JSON.parse(e.data);
+      console.log("Message: "+obj.message);
+      switch (obj.message) {
+        case "ping":
+          senddate("pong");
+          break;
+        case "error":
+          $('#main').addClass('hidden');
+          $('#footer').addClass('hidden');
+          $('body').css('background-color', 'black');
+          break;
+        default:
+          $('#main').removeClass('hidden');
+          $('#footer').removeClass('hidden');
+          $('body').css('background-color', 'grey');
+          break;
+      }
     };
     ws.onclose = function() {
       document.getElementById('btnDisConnect').innerHTML='Disconnect, click to reconnect';
@@ -112,23 +133,23 @@ function readDeviceOrientation() {
 
   if (Math.abs(window.orientation) === 90) {
     // Landscape
-    senddata("stop"); 
+    senddata("error"); 
   } else {
     // Portrait
-    senddata("start"); 
+    senddata("initial"); 
 
   }
 
 }
 
 window.onorientationchange = readDeviceOrientation;
-function senddata(state) {
+function senddata(status) {
   // Construct a msg object containing the data the server needs to process the message from the chat client.
   if (ws !== null) {
     var msg = {
       name: document.getElementById('name').value,
-      state: state,
-      date: Date.now()
+      uuid: guid,
+      status: status,
     };
 
     ws.send(JSON.stringify(msg));

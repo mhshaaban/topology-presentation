@@ -11,6 +11,32 @@ function generateUUID(){
   return uuid;
 }
 var guid = generateUUID();
+var step = 1;
+var btnStep = document.getElementById("step");
+btnStep.onclick = function() {
+  switch (step) {
+    case 1:
+      document.getElementById('step').innerHTML='Step ' + step + ' - 15 years ago, the pet!';
+      step = 2;
+      break;
+    case 2:
+      document.getElementById('step').innerHTML='Step ' + step + ' - 10 years ago, a menagerie';
+      step = 3;
+      break;
+    case 3:
+      document.getElementById('step').innerHTML='Step ' + step + ' - 5 years ago, to tame the animals';
+      step = 4;
+      break;
+    case 4:
+      document.getElementById('step').innerHTML='Step ' + step + ' - now, the cattle';
+      step = 5;
+      break;
+    default:
+      document.getElementById('step').innerHTML='Step ' + step + ' - 15 years ago, the pet!';
+      step = 1;
+      break;
+  } 
+}
 
 var demourl = window.location.protocol +'//'+ window.location.hostname+':'+window.location.port;
 document.getElementById("demourl").innerHTML = demourl;
@@ -21,7 +47,7 @@ new QRCode(document.getElementById("qrcode"), {
   //  height: 150,
 });
 document.getElementById("codedemo").innerHTML  = sessionID;
-document.getElementById("codedemo2").innerHTML  = sessionID;
+//document.getElementById("codedemo2").innerHTML  = sessionID;
 //Reveal.addEventListener( 'slideJoin', function() {
 // (function() {
 //JSONData = {
@@ -76,19 +102,50 @@ var link = svg.selectAll(".link");
     .enter().append("line")
     .attr("class", "link");
 
-  node.append("image")
+  var images = node.append("image")
     .attr("xlink:href", function(d) { return d.icon; })
-    .attr("x", -8)
-    .attr("y", -8)
+    .attr("x", -40)
+    .attr("y", -40)
     .attr("width", 64)
     .attr("height", 64);
 
   node.append("text")
-    .attr("dx", 54)
+    .attr("fill", function(d) { return d.color; })
+    .style("font-size","34px")
+    .attr("dx", 20)
+    .attr("font-family","sans-serif")
+    .attr("font-size","20px")
     .attr("dy", ".05em")
     .text(function(d) { return d.name; });
 
+  // make the image grow a little on mouse over and add the text details on click
+  var setEvents = images
+  // Append hero text
+    .on( 'click', function (d) {
+      d3.select("#NodeName").html(d.name); 
+      d3.select("#NodeStatus").html(d.status); 
+    })
 
+  /*
+    .on( 'mouseenter', function() {
+      // select element in current context
+      d3.select( this )
+        .transition()
+        .attr("x", function(d) { return -60;})
+        .attr("y", function(d) { return -60;})
+        .attr("height", 100)
+        .attr("width", 100);
+    })
+  // set back
+    .on( 'mouseleave', function() {
+      d3.select( this )
+        .transition()
+        .attr("x", function(d) { return -25;})
+        .attr("y", function(d) { return -25;})
+        .attr("height", 50)
+        .attr("width", 50);
+    });
+*/
   /*
   force.on("tick", function() {
 //    node.attr("cx", function(d) { return d.x; })
@@ -119,7 +176,16 @@ ws.onmessage = function(evt) {
   // append new data from the socket
   var elements = JSON.parse(evt.data);
   console.log(JSON.stringify(elements));
-  if (elements.nodes.length === 0) {
+  if (elements.message === "ping") {
+    var msg = {
+      name: "presenter",
+      id: 0,
+      uuid: guid,
+      icon: "/img/laptop.png",
+      status: "pong"
+    };
+    ws.send(JSON.stringify(msg));
+    console.log("pong sent");
     return;
   }
   JSONData.nodes = elements.nodes;

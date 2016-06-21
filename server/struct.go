@@ -8,6 +8,7 @@ type Node struct {
 	Device string `json:"device"`
 	Icon   string `json:"icon"`
 	Status string `json:"status"`
+	Color  string `json:"color"`
 }
 
 //Link is describing a link between two nodes
