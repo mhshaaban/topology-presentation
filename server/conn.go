@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -70,10 +71,40 @@ func (c *Conn) readPump(ID string) {
 		log.Printf("==> [%v] Received message: %v (%s)", ID, message, string(b))
 
 		hubs.RLock()
-		msg := Message{Nodes: []Node{message}, Links: []Link{Link{Source: 0, Target: 0}}}
-		log.Printf("==> [%v] Broadcasting message: %v", ID, msg)
+		topologies.Lock()
+		found := false
+		for i, node := range topologies.t[ID].Nodes {
+			if node.UUID == message.UUID {
+				topologies.t[ID].Nodes[i].Status = message.Status
+				found = true
+			}
+		}
+		if !found {
+			var ios = regexp.MustCompile(`(?i).*ios|iphone.*`)
+			var android = regexp.MustCompile(`(?i).*android.*`)
+			if message.Icon == "" {
+				var icon string
+				switch {
+				case ios.MatchString(message.Device):
+					icon = "/img/iphone-phone-color.png"
+				case android.MatchString(message.Device):
+					icon = "/img/android-phone-color.png"
+				default:
+					icon = "/img/smartphone.png"
+				}
+				message.Icon = icon
+			}
 
-		hubs.h[ID].broadcast <- msg
+			topologies.t[ID].Nodes = append(topologies.t[ID].Nodes, message)
+		}
+		if len(topologies.t[ID].Links) == 0 {
+			// Add a dummy link for d3.js
+			topologies.t[ID].Links = append(topologies.t[ID].Links, Link{Source: 0, Target: 0})
+		}
+		log.Printf("==> [%v] Broadcasting message: %v", ID, topologies.t[ID])
+
+		hubs.h[ID].broadcast <- *topologies.t[ID]
+		topologies.Unlock()
 		hubs.RUnlock()
 	}
 }

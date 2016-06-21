@@ -21,6 +21,7 @@ new QRCode(document.getElementById("qrcode"), {
   //  height: 150,
 });
 document.getElementById("codedemo").innerHTML  = sessionID;
+document.getElementById("codedemo2").innerHTML  = sessionID;
 //Reveal.addEventListener( 'slideJoin', function() {
 // (function() {
 JSONData = {
