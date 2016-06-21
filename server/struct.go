@@ -3,7 +3,8 @@ package server
 // Node is a structure describing a single node
 type Node struct {
 	Name   string `json:"name"`
-	UUID   string `json:"id"`
+	ID     int    `json:"id"`
+	UUID   string `json:"uuid"`
 	Device string `json:"device"`
 	Icon   string `json:"icon"`
 	Status string `json:"status"`

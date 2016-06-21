@@ -54,7 +54,7 @@ func (c *Conn) readPump(ID string) {
 	c.ws.SetReadDeadline(time.Now().Add(pongWait))
 	c.ws.SetPongHandler(func(string) error { c.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
-		var message Message
+		var message Node
 		//err := websocket.ReadJSON(c.ws, &message)
 		_, b, err := c.ws.ReadMessage()
 		if err != nil {
@@ -70,7 +70,10 @@ func (c *Conn) readPump(ID string) {
 		log.Printf("==> [%v] Received message: %v (%s)", ID, message, string(b))
 
 		hubs.RLock()
-		hubs.h[ID].broadcast <- message
+		msg := Message{Nodes: []Node{message}, Links: []Link{Link{Source: 0, Target: 0}}}
+		log.Printf("==> [%v] Broadcasting message: %v", ID, msg)
+
+		hubs.h[ID].broadcast <- msg
 		hubs.RUnlock()
 	}
 }
@@ -159,6 +162,8 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		}
 		go hubs.h[ID].run()
 		hubs.h[ID].register <- conn
+		log.Printf("==> [%v] Creating a new topology", ID)
+		topologies.t[ID] = &Message{}
 	}
 
 	hubs.Unlock()

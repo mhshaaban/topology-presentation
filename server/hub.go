@@ -4,10 +4,6 @@
 
 package server
 
-import (
-	"sync"
-)
-
 // Hub maintains the set of active connections and broadcasts messages to the
 // connections.
 type Hub struct {
@@ -23,11 +19,6 @@ type Hub struct {
 	// Unregister requests from connections.
 	unregister chan *Conn
 }
-
-var hubs = struct {
-	sync.RWMutex
-	h map[string]*Hub
-}{h: make(map[string]*Hub)}
 
 /*
 var hub = Hub{

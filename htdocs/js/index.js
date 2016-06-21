@@ -15,9 +15,6 @@ function generateUUID(){
 var guid = generateUUID();
 console.log(guid);
 
-var sessionID = Math.floor(1000 + Math.random() * 9000);
-sessionID = 1234;
-
 var status = "initial";
 
 
@@ -72,13 +69,13 @@ window.onload = function() {
 
   btnConnect.onclick = function () {
     var name = document.getElementById('name').value;
-    var democode = document.getElementById('demoCode').value;
+    var sessionID = document.getElementById('demoCode').value;
     if (name === null || name === "") {
       alert("Please enter your name");
       return;
     }
     console.log('opening websocket');
-    ws = new WebSocket('wss://' + window.location.host + '/serveWs/'+ 1234);
+    ws = new WebSocket('wss://' + window.location.host + '/serveWs/'+ sessionID);
     ws.onopen = function() {
 
       $('#login').addClass('hidden');
@@ -86,15 +83,11 @@ window.onload = function() {
       $('#footer').removeClass('hidden');
       console.log('hiding login');
       var msg = {
-        id: guid,
-        message: 'hello',
-        nodes: [
-          {
-            name: name,  
-            id: guid,
-            device: navigator.userAgent
-          }
-        ]
+        name: name,  
+        id: 0,
+        uuid: guid,
+        device: navigator.userAgent,
+        status: status
       };
       console.log("Sending"+JSON.stringify(msg));
       ws.send(JSON.stringify(msg));
