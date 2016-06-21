@@ -24,10 +24,10 @@ document.getElementById("codedemo").innerHTML  = sessionID;
 document.getElementById("codedemo2").innerHTML  = sessionID;
 //Reveal.addEventListener( 'slideJoin', function() {
 // (function() {
-JSONData = {
-  "nodes": [{}],
-  "links": [{}]
-};
+//JSONData = {
+//  "nodes": [{}],
+//  "links": [{}]
+//};
 JSONData = {
       "nodes": [
         {
@@ -56,7 +56,10 @@ var force = d3.layout.force()
   .gravity(0.01)
   .size([width, height]);
 
+
 var refreshSlide1 = function() {
+var node = svg.selectAll(".node");
+var link = svg.selectAll(".link");
   console.log('entering refreshSlide1');
 
   force
@@ -64,14 +67,12 @@ var refreshSlide1 = function() {
     .links(JSONData.links)
     .start();
 
-  var node = svg.selectAll(".node")
-    .data(JSONData.nodes)//, function(d) { return d.uuid; })
+    node.data(JSONData.nodes, function(d) { console.log('Refreshing '+ d.id); return d.id; })
     .enter().append("g")
     .attr("class", "node")
     .call(force.drag);
 
-  var link = svg.selectAll(".link")
-    .data(JSONData.links)
+    link.data(JSONData.links)
     .enter().append("line")
     .attr("class", "link");
 
@@ -118,6 +119,9 @@ ws.onmessage = function(evt) {
   // append new data from the socket
   var elements = JSON.parse(evt.data);
   console.log(JSON.stringify(elements));
+  if (elements.nodes.length === 0) {
+    return;
+  }
   JSONData.nodes = elements.nodes;
   JSONData.links =elements.links;
   refreshSlide1();
