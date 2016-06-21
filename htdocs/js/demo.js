@@ -28,18 +28,18 @@ JSONData = {
   "nodes": [{}],
   "links": [{}]
 };
-//JSONData = {
-//      "nodes": [
-//        {
-//          "name": "Presenter", 
-//          "id":0,
-//          "icon": "/img/laptop.png"
-//        },
-//      ],
-//      "links": [
-//        {"source":0,"target":0}
-//      ]
-//    };
+JSONData = {
+      "nodes": [
+        {
+          "name": "Presenter", 
+          "id":0,
+          "icon": "/img/laptop.png"
+        },
+      ],
+      "links": [
+        {"source":0,"target":0}
+      ]
+    };
 
 //var color = d3.scale.category10();
 
@@ -118,55 +118,8 @@ ws.onmessage = function(evt) {
   // append new data from the socket
   var elements = JSON.parse(evt.data);
   console.log(JSON.stringify(elements));
-  //JSONData.nodes = JSONData.nodes.concat(elements.nodes);
-  //JSONData.links = JSONData.links.concat(elements.links);
-  JSONData2 = {
-    "nodes": [{}],
-    "links": [{"source": 0, "target": 0}]
-  };
-  for (var j=0;j< elements.nodes.length; j++) {
-    console.log('looping for element'+j);
-    var found = false;
-    for (var i=0;i<JSONData.nodes.length;i++) {
-      // If match
-      if (elements.nodes[j].uuid === JSONData.nodes[i].uuid) {
-        console.log('Element found in the array '+elements.nodes[j].uuid+" "+JSONData.nodes[i].uuid);
-        JSONData.nodes[i].status = elements.nodes[j].status;
-        found = true;
-        break;
-      }
-    }
-    if (found === false) {
-      console.log('element not found, appending it');
-      console.log('Length of JSONData2.nodes: '+JSONData2.nodes.length);
-      if (JSONData2.nodes.length > 1) {
-        JSONData2.nodes = JSONData2.nodes.concat(elements.nodes[j]);
-      } else {
-        JSONData2.nodes[0] = elements.nodes[j];
-      }
-    }
-  }
-  for (var t=0;t< elements.links.length; t++) {
-    console.log('looping for element'+t);
-    var found2 = false;
-    for (var i2=0;i2<JSONData.links.length;i2++) {
-      // If match
-      if (elements.links[t].source === JSONData.links[i2].source && elements.links[t].target === JSONData.links[i2].target) {
-        console.log('Element found in the array '+elements.links[t].uuid+" "+JSONData.links[i2].uuid);
-        found2 = true;
-        break;
-      }
-    }
-    if (found2 === false) {
-      console.log('element not found, appending it');
-      JSONData2.links = JSONData2.links.concat(elements.links[t]);
-    }
-  }
-//  JSONData.nodes = elements.nodes;
-    JSONData.nodes = JSONData2.nodes;
-   JSONData.links = elements.links;
-//  JSONData.links = elements.links;
-  console.log("to be appened"+JSON.stringify(JSONData));
+  JSONData.nodes = elements.nodes;
+  JSONData.links =elements.links;
   refreshSlide1();
 };
 
