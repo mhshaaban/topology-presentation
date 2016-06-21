@@ -18,12 +18,53 @@ console.log(guid);
 var sessionID = Math.floor(1000 + Math.random() * 9000);
 sessionID = 1234;
 
+var status = "initial";
+
+
+
 
 window.onload = function() {
   var btnConnect = document.getElementById("btnConnect");
+  var btnDisConnect = document.getElementById("btnDisConnect");
+  var btnCreate = document.getElementById("btnCreate");
+  var btnDelete = document.getElementById("btnDelete");
+  var btnStop = document.getElementById("btnStop");
+  var btnStart = document.getElementById("btnStart");
+  var btnConfigure = document.getElementById("btnConfigure");
+
+  btnCreate.onclick = function() {
+    $("#heart").removeClass("hidden");
+    status = "created";
+  };
+  btnConfigure.onclick = function() {
+    if (status == "created") {
+      $("#heartimg").removeClass("sepia");
+      status = "configured";
+    }
+  };
+  btnStart.onclick = function() {
+    if (status == "configured") {
+      $("#heartimg").addClass("bottom");
+      status = "started";
+    }
+  };
+  btnStop.onclick = function() {
+    if (status == "started") {
+      $("#heartimg").removeClass("bottom");
+      status = "stopped";
+    }
+  };
+  btnDelete.onclick = function() {
+    if (status === "stopped") {
+      $("#heart").addClass("hidden");
+      $("#heartimg").addClass("sepia");
+      status= "initial"; 
+    }
+  };
+
   btnDisConnect.onclick = function () {
       ws.onclose = function () {}; // disable onclose handler first
-      ws.close()
+      ws.close();
       $('#login').removeClass('hidden');
       $('#main').addClass('hidden');
       $('#footer').addClass('hidden');
@@ -64,33 +105,6 @@ window.onload = function() {
       console.log("Received:",e);
       //document.getElementById('output').innerHTML += "Received: " + e.data + "<br>";
       var obj = JSON.parse(e.data);
-      switch (obj.state) {
-        case "runnable":
-          document.body.style.background = 'green';
-          state = 'runnable';
-          break;
-        case "notrunnable":
-          document.body.style.background = 'red';
-          state = 'notrunnable';
-          break;
-        case "connected":
-          document.body.style.background = 'blue';
-          break;
-        case "running":
-          document.getElementById('heart').style.visibility='visible';
-          break;
-        case "stopped":
-          document.getElementById('heart').style.visibility='hidden';
-          break;
-        case "autonomous":
-          document.getElementById('btn-start').style.visibility='visible';
-          document.getElementById('btn-stop').style.visibility='visible';
-          break;
-        case "conducted":
-          document.getElementById('btn-start').style.visibility='hidden';
-          document.getElementById('btn-stop').style.visibility='hidden';
-          break;
-      }
     };
     ws.onclose = function() {
       document.getElementById('btnDisConnect').innerHTML='Disconnect, click to reconnect';
@@ -101,18 +115,6 @@ window.onload = function() {
   };
 };
 
-function changeRequest(req) {
-  switch (req) {
-    case "start":
-      if (state == "runnable") {
-        document.getElementById('heart').style.visibility='visible';
-      }
-      break;
-    case "stop":
-      document.getElementById('heart').style.visibility='hidden';
-  } 
-  senddata(state);
-}
 function readDeviceOrientation() {
 
   if (Math.abs(window.orientation) === 90) {
