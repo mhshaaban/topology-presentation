@@ -208,21 +208,22 @@ if( window.location.search.match( /print-pdf/gi ) ) {
           </aside>
         </section>
 
-        <section>
-          <section data-state='slideJoin' data-background-image="/img/techsys.png" data-background-position="top">
+        <section data-state="slideJoin">
+          <section data-background-image="/img/techsys.png" data-background-position="top">
             <h5>A brief history of systems engineering</h5>
-            <div style='float:right'>
+            <div >
               <a href="http://localhost" id="demourl">url</a>
               <p id="codedemo">code</p>
+              <center>
+                <div id="qrcode"></div>
+              </center>
             </div>
-            <div class='left' style='float:left' id="qrcode"></div>
 
-            <div id="demo" > </div>
-            <script type="text/javascript" src="/js/slide1.js">
-            </script>					
           </section>
           <section data-background-image="/img/techsys.png" data-background-position="top">
-            <div id="demo2" > </div>
+            <div id="demo" > </div>
+            <script type="text/javascript" src="/js/demo.js">
+            </script>					
           </section>
         </section>
 

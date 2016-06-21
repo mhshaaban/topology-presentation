@@ -7,8 +7,8 @@ new QRCode(document.getElementById("qrcode"), {
 //  height: 150,
 });
 document.getElementById("codedemo").innerHTML  = sessionID;
-Reveal.addEventListener( 'slideJoin', function() {
-  (function() {
+//Reveal.addEventListener( 'slideJoin', function() {
+ // (function() {
     JSONData = {
       "nodes": [
         {
@@ -88,7 +88,7 @@ Reveal.addEventListener( 'slideJoin', function() {
 
   refreshSlide1();
 
-  })();
-} );
+//  })();
+//} );
 
 
