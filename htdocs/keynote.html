@@ -135,17 +135,25 @@ if( window.location.search.match( /print-pdf/gi ) ) {
           <script>
 Reveal.addEventListener( 'timeframe', function() {
   var t = Timeframe("#timeframe");
-  var starWarsFilms = {
+  var SEevolution = {
     name: "Star Wars Films",
     color: "#000000",
     events: [
     {
-      name: "A New Hope",
-      date: "1977-05-25"
+      name: "Puppet",
+      date: "2005-05-01"
     },
     {
-      name: "The Empire Strikes Back",
-      date: "1980-05-21"
+      name: "LXC",
+      date: "2008-08-06"
+    },
+    {
+      name: "VSphere",
+      date: "2009-03-30"
+    },
+    {
+      name: "Agile/DevOps adoption",
+      date: "2014-01-01"
     },
     {
       date: "1983-05-25"
@@ -153,9 +161,9 @@ Reveal.addEventListener( 'timeframe', function() {
     ]
   };
 
-  t.addCategory(starWarsFilms)
-    .start("1975-01-01")
-    .end("1985-01-01")
+  t.addCategory(SEevolution)
+    .start("2004-01-01")
+    .end("2016-06-01")
     .draw();
 } );
 
