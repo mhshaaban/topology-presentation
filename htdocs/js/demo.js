@@ -53,7 +53,7 @@ var svg = d3.select("#demo").append("svg:svg")
 var force = d3.layout.force()
   .charge(-200)
   .distance(300)
-  .gravity(0.01)
+  .gravity(0.1)
   .size([width, height]);
 
 
@@ -124,6 +124,7 @@ ws.onmessage = function(evt) {
   }
   JSONData.nodes = elements.nodes;
   JSONData.links =elements.links;
+  refreshSlide1();
   refreshSlide1();
 };
 
