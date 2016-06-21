@@ -21,3 +21,5 @@
     animation-iteration-count: infinite;
     animation-duration: 2s;
 }
+
+#heart img.sepia {-webkit-filter: sepia(100%); filter: sepia(100%);}

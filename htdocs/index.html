@@ -17,6 +17,7 @@
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="js/jquery.min.js"></script>
     <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/heart.css" rel="stylesheet">
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <link href="/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
@@ -44,20 +45,23 @@
           <input type="number" id="demoCode" class="form-control" placeholder="demo code" required autofocus>
           <label for="inputPassword" class="sr-only">Username</label>
           <input type="text" id="name" class="form-control" placeholder="Username" required>
-          <!--
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" value="remember-me"> Remember me
-            </label>
-          </div>
-  -->
           <button class="btn btn-lg btn-primary btn-block" type="submit" id="btnConnect">Connect!</button>
 
       </div> 
       <div id="main" class="hidden mainbox col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+        <div class="btn-toolbar" role="toolbar" aria-label="...">
+          <button type="button" class="btn btn-default btn-circle" id="btnCreate"><i class="glyphicon glyphicon-ok"></i></button>
+          <button type="button" class="btn btn-info btn-circle" id="btnConfigure"><i class="glyphicon glyphicon-cog"></i></button>
+          <button type="button" class="btn btn-success btn-circle" id="btnStart"><i class="glyphicon glyphicon-heart"></i></button>
+          <button type="button" class="btn btn-warning btn-circle" id="btnStop"><i class="glyphicon glyphicon-off"></i></button>
+          <button type="button" class="btn btn-danger btn-circle" id="btnDelete"><i class="glyphicon glyphicon-remove"></i></button>
+        </div>
+        <div id="heart" class="hidden">
+          <img class="sepia" src="img/heart.png" width="100" id="heartimg" alt="heart">
+        </div>
       </div>
       <div id="footer" class="footer navbar-fixed-bottom hidden">
-          <button class="btn btn-lg btn-block btn-success" type="submit" id="btnDisConnect">Connected to demo, click to disconnect</button>
+          <button class="btn btn-lg btn-block btn-success" type="submit" id="btnDisConnect">Connected, click to disconnect</button>
       </div>
     </div>
 
