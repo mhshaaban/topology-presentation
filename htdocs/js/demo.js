@@ -82,7 +82,7 @@ var force = d3.layout.force()
   .charge(-500)
   .distance(300)
   .gravity(0.1)
-  .linkStrength(0.2)
+  .linkStrength(0.1)
   .size([width, height]);
 
 
@@ -167,7 +167,9 @@ var link = svg.selectAll(".link");
   });
   */
   force.on('tick', function(e) {
-      node.attr('transform', function(d, i) {
+    node
+      //.transition().ease('linear').duration(400)
+      .attr('transform', function(d, i) {
       return 'translate('+ d.x +', '+ d.y +')';
     });
 
