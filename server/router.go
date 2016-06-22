@@ -32,17 +32,6 @@ func NewRouter() *mux.Router {
 		HandlerFunc(serveWs)
 	router.
 		Methods("GET").
-		Path("/slideJoin").
-		Name("WebSocket").
-		HandlerFunc(slideJoin)
-	router.
-		Methods("GET").
-		Path("/phone").
-		Name("WebSocket").
-		HandlerFunc(phone)
-
-	router.
-		Methods("GET").
 		PathPrefix("/").
 		Name("Static").
 		Handler(http.FileServer(http.Dir("./htdocs")))
