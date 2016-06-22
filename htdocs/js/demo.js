@@ -21,6 +21,7 @@ btnStep.onclick = function() {
       break;
     case 2:
       document.getElementById('step').innerHTML='Step ' + step + ' - 10 years ago, a menagerie';
+      refreshSlide1();
       step = 3;
       break;
     case 3:
@@ -34,9 +35,10 @@ btnStep.onclick = function() {
     default:
       document.getElementById('step').innerHTML='Step ' + step + ' - 15 years ago, the pet!';
       step = 1;
+      refreshSlide1();
       break;
   } 
-}
+};
 
 var demourl = window.location.protocol +'//'+ window.location.hostname+':'+window.location.port;
 document.getElementById("demourl").innerHTML = demourl;
@@ -77,9 +79,10 @@ var svg = d3.select("#demo").append("svg:svg")
   .attr("height", height);
 
 var force = d3.layout.force()
-  .charge(-200)
+  .charge(-500)
   .distance(300)
   .gravity(0.1)
+  .linkStrength(0.2)
   .size([width, height]);
 
 
@@ -89,9 +92,14 @@ var link = svg.selectAll(".link");
   console.log('entering refreshSlide1');
 
   force
-    .nodes(JSONData.nodes)
-    .links(JSONData.links)
-    .start();
+    .nodes(JSONData.nodes);
+    //.links(JSONData.links)
+    //.start();
+
+  if (step > 1) {
+    force.links(JSONData.links);
+  }
+    force.start();
 
     node.data(JSONData.nodes, function(d) { console.log('Refreshing '+ d.id); return d.id; })
     .enter().append("g")
@@ -111,7 +119,7 @@ var link = svg.selectAll(".link");
 
   node.append("text")
     .attr("fill", function(d) { return d.color; })
-    .style("font-size","34px")
+    .style("font-size","20px")
     .attr("dx", 20)
     .attr("font-family","sans-serif")
     .attr("font-size","20px")
@@ -124,7 +132,7 @@ var link = svg.selectAll(".link");
     .on( 'click', function (d) {
       d3.select("#NodeName").html(d.name); 
       d3.select("#NodeStatus").html(d.status); 
-    })
+    });
 
   /*
     .on( 'mouseenter', function() {
