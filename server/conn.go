@@ -44,11 +44,9 @@ type Conn struct {
 }
 
 // readPump pumps messages from the websocket connection to the hub.
-func (c *Conn) readPump(ID string) {
+func (c *Conn) readPump(ID string, h *Hub) {
 	defer func() {
-		hubs.RLock()
-		hubs.h[ID].unregister <- c
-		hubs.RUnlock()
+		h.unregister <- c
 		c.ws.Close()
 	}()
 	c.ws.SetReadLimit(maxMessageSize)
@@ -73,7 +71,6 @@ func (c *Conn) readPump(ID string) {
 			continue
 		}
 
-		hubs.RLock()
 		topologies.Lock()
 		found := false
 		nodeID := 0
@@ -135,9 +132,8 @@ func (c *Conn) readPump(ID string) {
 		}
 		log.Printf("==> [%v] Broadcasting message: %v", ID, topologies.t[ID])
 
-		hubs.h[ID].broadcast <- *topologies.t[ID]
+		h.broadcast <- *topologies.t[ID]
 		topologies.Unlock()
-		hubs.RUnlock()
 	}
 }
 
@@ -211,25 +207,31 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		log.Printf("No ID provided, bailing out")
 		return
 	}
-	hubs.Lock()
-	if _, ok := hubs.h[ID]; ok {
-		log.Printf("==> [%v] A hub alredy exist for this ID", ID)
-		hubs.h[ID].register <- conn
-	} else {
-		log.Printf("==> [%v] Creating a new hub", ID)
-		hubs.h[ID] = &Hub{
-			broadcast:   make(chan Message),
-			register:    make(chan *Conn),
-			unregister:  make(chan *Conn),
-			connections: make(map[*Conn]bool),
+	/*
+		if _, ok := hubs.h[ID]; ok {
+			log.Printf("==> [%v] A hub alredy exist for this ID", ID)
+			hubs.h[ID].register <- conn
+		} else {
+			log.Printf("==> [%v] Creating a new hub", ID)
+			hubs.h[ID] = &Hub{
+				broadcast:   make(chan Message),
+				register:    make(chan *Conn),
+				unregister:  make(chan *Conn),
+				connections: make(map[*Conn]bool),
+			}
+			go hubs.h[ID].run()
+			hubs.h[ID].register <- conn
+			log.Printf("==> [%v] Creating a new topology", ID)
+			topologies.t[ID] = &Message{}
 		}
-		go hubs.h[ID].run()
-		hubs.h[ID].register <- conn
-		log.Printf("==> [%v] Creating a new topology", ID)
-		topologies.t[ID] = &Message{}
+	*/
+	var hub = &Hub{
+		broadcast:   make(chan Message),
+		register:    make(chan *Conn),
+		unregister:  make(chan *Conn),
+		connections: make(map[*Conn]bool),
 	}
-
-	hubs.Unlock()
+	go hub.run()
 	go conn.writePump(ID)
-	conn.readPump(ID)
+	conn.readPump(ID, hub)
 }

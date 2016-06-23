@@ -20,15 +20,36 @@ type Hub struct {
 	unregister chan *Conn
 }
 
-/*
-var hub = Hub{
-	broadcast:   make(chan Message),
-	register:    make(chan *Conn),
-	unregister:  make(chan *Conn),
-	connections: make(map[*Conn]bool),
-}
-*/
+// Hubs maintains the set of active Hubs
+type Hubs struct {
+	// Registered connections.
+	connections map[*Hub]bool
 
+	// Register requests from the connections.
+	register chan *Hub
+
+	// Unregister requests from connections.
+	unregister chan *Hub
+}
+
+var AllHubs = Hubs{
+	register:    make(chan *Hub),
+	unregister:  make(chan *Hub),
+	connections: make(map[*Hub]bool),
+}
+
+func (h *Hubs) run() {
+	for {
+		select {
+		case hub := <-h.register:
+			h.connections[hub] = true
+		case hub := <-h.unregister:
+			if _, ok := h.connections[hub]; ok {
+				delete(h.connections, hub)
+			}
+		}
+	}
+}
 func (h *Hub) run() {
 	for {
 		select {
@@ -39,8 +60,10 @@ func (h *Hub) run() {
 				delete(h.connections, conn)
 				close(conn.send)
 			}
-			// TODO
-			// If the last element has been removed, clean the Hubs map
+			// If the last element has been removed exit)
+			if len(h.connections) == 0 {
+				return
+			}
 		case message := <-h.broadcast:
 			for conn := range h.connections {
 				select {
