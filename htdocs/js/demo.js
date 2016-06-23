@@ -82,7 +82,6 @@ var force = d3.layout.force()
   .charge(-500)
   .distance(300)
   .gravity(0.1)
-  .linkStrength(0.1)
   .size([width, height]);
 
 
