@@ -7,6 +7,9 @@ package server
 // Hub maintains the set of active connections and broadcasts messages to the
 // connections.
 type Hub struct {
+	// ID of the Hubs
+	ID int
+
 	// Registered connections.
 	connections map[*Conn]bool
 
@@ -22,27 +25,37 @@ type Hub struct {
 
 // Hubs maintains the set of active Hubs
 type Hubs struct {
+	// Unregister
+	unregister chan int
+
 	// Registered hubs.
-	hubs map[*Hub]bool
+	hubs map[int]*Hub
 
 	// Register requests from the connections.
-	register chan *Hub
+	Request chan *Reply
+}
 
-	// Unregister requests from connections.
-	unregister chan *Hub
+type Reply struct {
+	ID  int
+	Rep chan *Hub
 }
 
 var AllHubs = Hubs{
-	register:   make(chan *Hub),
-	unregister: make(chan *Hub),
-	hubs:       make(map[*Hub]bool),
+	Request: make(chan *Reply),
+	hubs:    make(map[int]*Hub),
 }
 
-func (h *Hubs) run() {
+// The main routine for registering the hubs
+func (h *Hubs) Run() {
 	for {
 		select {
-		case hub := <-h.register:
-			h.hubs[hub] = true
+		case r := <-h.Request:
+			if hub, ok := h.hubs[r.ID]; ok {
+				r.Rep <- hub
+			} else {
+				//TODO create a new hub
+				// And add it to the hubs map
+			}
 		case hub := <-h.unregister:
 			if _, ok := h.hubs[hub]; ok {
 				delete(h.hubs, hub)
@@ -62,7 +75,7 @@ func (h *Hub) run() {
 			}
 			// If the last element has been removed exit)
 			if len(h.connections) == 0 {
-				AllHubs.unregister <- h
+				AllHubs.unregister <- h.ID
 				return
 			}
 		case message := <-h.broadcast:
