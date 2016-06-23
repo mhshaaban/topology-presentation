@@ -22,8 +22,8 @@ type Hub struct {
 
 // Hubs maintains the set of active Hubs
 type Hubs struct {
-	// Registered connections.
-	connections map[*Hub]bool
+	// Registered hubs.
+	hubs map[*Hub]bool
 
 	// Register requests from the connections.
 	register chan *Hub
@@ -33,19 +33,19 @@ type Hubs struct {
 }
 
 var AllHubs = Hubs{
-	register:    make(chan *Hub),
-	unregister:  make(chan *Hub),
-	connections: make(map[*Hub]bool),
+	register:   make(chan *Hub),
+	unregister: make(chan *Hub),
+	hubs:       make(map[*Hub]bool),
 }
 
 func (h *Hubs) run() {
 	for {
 		select {
 		case hub := <-h.register:
-			h.connections[hub] = true
+			h.hubs[hub] = true
 		case hub := <-h.unregister:
-			if _, ok := h.connections[hub]; ok {
-				delete(h.connections, hub)
+			if _, ok := h.hubs[hub]; ok {
+				delete(h.hubs, hub)
 			}
 		}
 	}
