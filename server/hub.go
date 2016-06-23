@@ -62,6 +62,7 @@ func (h *Hub) run() {
 			}
 			// If the last element has been removed exit)
 			if len(h.connections) == 0 {
+				AllHubs.unregister <- h
 				return
 			}
 		case message := <-h.broadcast:
