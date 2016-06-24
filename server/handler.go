@@ -27,9 +27,9 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	}
 	conn := &Conn{send: make(chan Message, 256), ws: ws}
 	topologies.t[Tag] = &Message{}
-	reply := &Reply{
+	reply := &reply{
 		Tag: Tag,
-		Rep: make(chan *Hub),
+		Rep: make(chan *hub),
 	}
 	defer close(reply.Rep)
 

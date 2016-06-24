@@ -46,7 +46,7 @@ type Conn struct {
 }
 
 // readPump pumps messages from the websocket connection to the hub.
-func (c *Conn) readPump(Tag Tag, h *Hub) {
+func (c *Conn) readPump(Tag Tag, h *hub) {
 	var contextLogger = log.WithFields(log.Fields{
 		"Tag": Tag,
 	})

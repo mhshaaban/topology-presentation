@@ -8,14 +8,17 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-// Hub maintains the set of active connections and broadcasts messages to the
+// hub maintains the set of active connections and broadcasts messages to the
 // connections.
-type Hub struct {
-	// Tag of the Hubs
+type hub struct {
+	// Tag of the hubs
 	Tag Tag
 
 	// Registered connections.
 	connections map[*Conn]bool
+
+	// The last message broadcasted
+	message Message
 
 	// Inbound messages from the connections.
 	broadcast chan Message
@@ -27,37 +30,38 @@ type Hub struct {
 	unregister chan *Conn
 }
 
-// Hubs maintains the set of active Hubs
-type Hubs struct {
+// hubs maintains the set of active hubs
+type hubs struct {
 	// Unregister
 	unregister chan Tag
 
 	// Registered hubs.
-	hubs map[Tag]*Hub
+	hubs map[Tag]*hub
 
 	// Register requests from the connections.
-	Request chan *Reply
+	Request chan *reply
 }
 
-type Reply struct {
+type reply struct {
 	Tag Tag
-	Rep chan *Hub
+	Rep chan *hub
 }
 
-var AllHubs = Hubs{
+// AllHubs is the actual registry of all hubs
+var AllHubs = hubs{
 	unregister: make(chan Tag),
-	Request:    make(chan *Reply),
-	hubs:       make(map[Tag]*Hub),
+	Request:    make(chan *reply),
+	hubs:       make(map[Tag]*hub),
 }
 
-// The main routine for registering the hubs
-func (h *Hubs) Run() {
+// Run is main routine for registering the hubs
+func (h *hubs) Run() {
 	for {
 		select {
 		case r := <-h.Request:
 			if _, ok := h.hubs[r.Tag]; !ok {
 				//TODO create a new hub
-				var hub = &Hub{
+				var hub = &hub{
 					Tag:         r.Tag,
 					broadcast:   make(chan Message),
 					register:    make(chan *Conn),
@@ -66,7 +70,7 @@ func (h *Hubs) Run() {
 				}
 				var contextLogger = log.WithFields(log.Fields{
 					"Tag": r.Tag,
-					"Hub": &hub,
+					"hub": &hub,
 				})
 				contextLogger.Debug("New HUB")
 				go hub.run()
@@ -79,7 +83,7 @@ func (h *Hubs) Run() {
 			if _, ok := h.hubs[hub]; ok {
 				var contextLogger = log.WithFields(log.Fields{
 					"Tag": hub,
-					"Hub": h.hubs[hub],
+					"hub": h.hubs[hub],
 				})
 				contextLogger.Debug("Unregistering HUB")
 				delete(h.hubs, hub)
@@ -87,7 +91,7 @@ func (h *Hubs) Run() {
 		}
 	}
 }
-func (h *Hub) run() {
+func (h *hub) run() {
 	for {
 		select {
 		case conn := <-h.register:
@@ -95,14 +99,14 @@ func (h *Hub) run() {
 			log.WithFields(log.Fields{
 				"Connections": len(h.connections),
 				"Connection":  conn,
-				"Hub":         &h,
+				"hub":         &h,
 			}).Debug("Registerng connection")
 		case conn := <-h.unregister:
 			if _, ok := h.connections[conn]; ok {
 				log.WithFields(log.Fields{
 					"Connections": len(h.connections),
 					"Connection":  conn,
-					"Hub":         &h,
+					"hub":         &h,
 				}).Debug("Unregisterng connection")
 				delete(h.connections, conn)
 				close(conn.send)
@@ -114,12 +118,12 @@ func (h *Hub) run() {
 			}
 		case message := <-h.broadcast:
 			log.WithFields(log.Fields{
-				"Hub": &h,
+				"hub": &h,
 			}).Debug("Broadcast")
 			for conn := range h.connections {
 				log.WithFields(log.Fields{
 					"Connection": conn,
-					"Hub":        &h,
+					"hub":        &h,
 				}).Debug("Sending...")
 				select {
 				case conn.send <- message:
