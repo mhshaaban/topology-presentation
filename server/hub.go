@@ -4,6 +4,10 @@
 
 package server
 
+import (
+	log "github.com/Sirupsen/logrus"
+)
+
 // Hub maintains the set of active connections and broadcasts messages to the
 // connections.
 type Hub struct {
@@ -50,9 +54,7 @@ func (h *Hubs) Run() {
 	for {
 		select {
 		case r := <-h.Request:
-			if hub, ok := h.hubs[r.ID]; ok {
-				r.Rep <- hub
-			} else {
+			if _, ok := h.hubs[r.ID]; !ok {
 				//TODO create a new hub
 				var hub = &Hub{
 					ID:          r.ID,
@@ -61,14 +63,23 @@ func (h *Hubs) Run() {
 					unregister:  make(chan *Conn),
 					connections: make(map[*Conn]bool),
 				}
+				var contextLogger = log.WithFields(log.Fields{
+					"ID":  r.ID,
+					"Hub": &hub,
+				})
+				contextLogger.Debug("New HUB")
 				go hub.run()
-				// And add it to the hubs map
 				h.hubs[r.ID] = hub
-				r.Rep <- hub
 				// By the end reply to the sender
 			}
+			r.Rep <- h.hubs[r.ID]
 		case hub := <-h.unregister:
 			if _, ok := h.hubs[hub]; ok {
+				var contextLogger = log.WithFields(log.Fields{
+					"ID":  hub,
+					"Hub": h.hubs[hub],
+				})
+				contextLogger.Debug("Unregistering HUB")
 				delete(h.hubs, hub)
 			}
 		}
@@ -90,7 +101,14 @@ func (h *Hub) run() {
 				return
 			}
 		case message := <-h.broadcast:
+			log.WithFields(log.Fields{
+				"Hub": &h,
+			}).Debug("Broadcast")
 			for conn := range h.connections {
+				log.WithFields(log.Fields{
+					"Connection": conn,
+					"Hub":        &h,
+				}).Debug("Sending...")
 				select {
 				case conn.send <- message:
 				default:

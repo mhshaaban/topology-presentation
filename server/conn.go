@@ -6,7 +6,7 @@ package server
 
 import (
 	"encoding/json"
-	"log"
+	log "github.com/Sirupsen/logrus"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -15,6 +15,10 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
+
+func init() {
+	log.SetLevel(log.InfoLevel)
+}
 
 const (
 	// Time allowed to write a message to the peer.
@@ -46,6 +50,9 @@ type Conn struct {
 
 // readPump pumps messages from the websocket connection to the hub.
 func (c *Conn) readPump(ID int, h *Hub) {
+	var contextLogger = log.WithFields(log.Fields{
+		"ID": ID,
+	})
 	defer func() {
 		h.unregister <- c
 		c.ws.Close()
@@ -59,15 +66,17 @@ func (c *Conn) readPump(ID int, h *Hub) {
 		_, b, err := c.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
-				log.Printf("==> [%v] error: %v", ID, err)
+				contextLogger.Error(err)
 			}
 			break
 		}
 		err = json.Unmarshal(b, &message)
 		if err != nil {
-			log.Printf("==> [%v] Received message but cannot unmarshal it, %v", ID, err)
+			contextLogger.Error(err)
+			return
 		}
-		log.Printf("==> [%v] Received message: %v (%s)", ID, message, string(b))
+		contextLogger.Debug(message)
+		//log.Debug("==> [%v] Received message: %v (%s)", ID, message, string(b))
 		if message.Status == "pong" {
 			continue
 		}
@@ -131,8 +140,7 @@ func (c *Conn) readPump(ID int, h *Hub) {
 			// Add a dummy link for d3.js
 			topologies.t[ID].Links = append(topologies.t[ID].Links, Link{Source: 0, Target: 0})
 		}
-		log.Printf("==> [%v] Broadcasting message: %v", ID, topologies.t[ID])
-
+		//log.Debug("==> [%v] Broadcasting message: %v", ID, topologies.t[ID])
 		h.broadcast <- *topologies.t[ID]
 		topologies.Unlock()
 	}
@@ -198,10 +206,14 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	ID, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		log.Printf("No ID provided, bailing out")
+		log.Warn("No ID provided, bailing out")
 		return
 	}
-	log.Printf("=> Connection to %v", ID)
+	var contextLogger = log.WithFields(log.Fields{
+		"ID":   ID,
+		"From": r.RemoteAddr,
+	})
+	contextLogger.Info("New connection")
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
@@ -213,8 +225,12 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		ID:  ID,
 		Rep: make(chan *Hub),
 	}
+	defer close(reply.Rep)
+
 	AllHubs.Request <- reply
 	hub := <-reply.Rep
+	hub.register <- conn
 	go conn.writePump(ID)
 	conn.readPump(ID, hub)
+	contextLogger.Info("Connection ended")
 }
