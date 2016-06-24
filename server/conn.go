@@ -46,9 +46,9 @@ type Conn struct {
 }
 
 // readPump pumps messages from the websocket connection to the hub.
-func (c *Conn) readPump(ID int, h *Hub) {
+func (c *Conn) readPump(Tag Tag, h *Hub) {
 	var contextLogger = log.WithFields(log.Fields{
-		"ID": ID,
+		"Tag": Tag,
 	})
 	defer func() {
 		h.unregister <- c
@@ -60,12 +60,15 @@ func (c *Conn) readPump(ID int, h *Hub) {
 	for {
 		var message Node
 		//err := websocket.ReadJSON(c.ws, &message)
-		_, b, err := c.ws.ReadMessage()
+		t, b, err := c.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
 				contextLogger.Error(err)
 			}
 			break
+		}
+		if t == websocket.PingMessage {
+			continue
 		}
 		err = json.Unmarshal(b, &message)
 		if err != nil {
@@ -73,17 +76,13 @@ func (c *Conn) readPump(ID int, h *Hub) {
 			return
 		}
 		contextLogger.Debug(message)
-		//log.Debug("==> [%v] Received message: %v (%s)", ID, message, string(b))
-		if message.Status == "pong" {
-			continue
-		}
 
 		topologies.Lock()
 		found := false
-		nodeID := 0
-		for i, node := range topologies.t[ID].Nodes {
+		nodeTag := 0
+		for i, node := range topologies.t[Tag].Nodes {
 			if node.UUID == message.UUID {
-				topologies.t[ID].Nodes[i].Status = message.Status
+				topologies.t[Tag].Nodes[i].Status = message.Status
 				switch message.Status {
 				case "initial":
 					message.Color = "black"
@@ -98,10 +97,10 @@ func (c *Conn) readPump(ID int, h *Hub) {
 				default:
 					message.Color = "black"
 				}
-				topologies.t[ID].Nodes[i].Color = message.Color
+				topologies.t[Tag].Nodes[i].Color = message.Color
 				found = true
 			}
-			nodeID = i + 1
+			nodeTag = i + 1
 		}
 		// New node
 		if !found {
@@ -120,25 +119,25 @@ func (c *Conn) readPump(ID int, h *Hub) {
 				}
 				message.Icon = icon
 			}
-			message.ID = nodeID
-			topologies.t[ID].Nodes = append(topologies.t[ID].Nodes, message)
+			message.Tag = nodeTag
+			topologies.t[Tag].Nodes = append(topologies.t[Tag].Nodes, message)
 			// Add a link to the previous node
-			if nodeID >= 1 {
-				topologies.t[ID].Links = append(topologies.t[ID].Links, Link{Source: nodeID, Target: nodeID - 1})
+			if nodeTag >= 1 {
+				topologies.t[Tag].Links = append(topologies.t[Tag].Links, Link{Source: nodeTag, Target: nodeTag - 1})
 
 			}
 		}
 		if message.Status == "error" {
-			topologies.t[ID].Message = "error"
+			topologies.t[Tag].Message = "error"
 		} else {
-			topologies.t[ID].Message = "info"
+			topologies.t[Tag].Message = "info"
 		}
-		if len(topologies.t[ID].Links) == 0 {
+		if len(topologies.t[Tag].Links) == 0 {
 			// Add a dummy link for d3.js
-			topologies.t[ID].Links = append(topologies.t[ID].Links, Link{Source: 0, Target: 0})
+			topologies.t[Tag].Links = append(topologies.t[Tag].Links, Link{Source: 0, Target: 0})
 		}
-		//log.Debug("==> [%v] Broadcasting message: %v", ID, topologies.t[ID])
-		h.broadcast <- *topologies.t[ID]
+		//log.Debug("==> [%v] Broadcasting message: %v", Tag, topologies.t[Tag])
+		h.broadcast <- *topologies.t[Tag]
 		topologies.Unlock()
 	}
 }
@@ -150,7 +149,7 @@ func (c *Conn) write(mt int, payload Message) error {
 }
 
 // writePump pumps messages from the hub to the websocket connection.
-func (c *Conn) writePump(ID int) {
+func (c *Conn) writePump(Tag Tag) {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()

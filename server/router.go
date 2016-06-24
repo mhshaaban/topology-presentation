@@ -27,7 +27,7 @@ func NewRouter() *mux.Router {
 
 	router.
 		Methods("GET").
-		Path("/serveWs/{id}").
+		Path("/serveWs/{tag}").
 		Name("WebSocket").
 		HandlerFunc(serveWs)
 	router.

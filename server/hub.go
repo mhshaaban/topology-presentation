@@ -11,8 +11,8 @@ import (
 // Hub maintains the set of active connections and broadcasts messages to the
 // connections.
 type Hub struct {
-	// ID of the Hubs
-	ID int
+	// Tag of the Hubs
+	Tag Tag
 
 	// Registered connections.
 	connections map[*Conn]bool
@@ -30,24 +30,24 @@ type Hub struct {
 // Hubs maintains the set of active Hubs
 type Hubs struct {
 	// Unregister
-	unregister chan int
+	unregister chan Tag
 
 	// Registered hubs.
-	hubs map[int]*Hub
+	hubs map[Tag]*Hub
 
 	// Register requests from the connections.
 	Request chan *Reply
 }
 
 type Reply struct {
-	ID  int
+	Tag Tag
 	Rep chan *Hub
 }
 
 var AllHubs = Hubs{
-	unregister: make(chan int),
+	unregister: make(chan Tag),
 	Request:    make(chan *Reply),
-	hubs:       make(map[int]*Hub),
+	hubs:       make(map[Tag]*Hub),
 }
 
 // The main routine for registering the hubs
@@ -55,30 +55,30 @@ func (h *Hubs) Run() {
 	for {
 		select {
 		case r := <-h.Request:
-			if _, ok := h.hubs[r.ID]; !ok {
+			if _, ok := h.hubs[r.Tag]; !ok {
 				//TODO create a new hub
 				var hub = &Hub{
-					ID:          r.ID,
+					Tag:         r.Tag,
 					broadcast:   make(chan Message),
 					register:    make(chan *Conn),
 					unregister:  make(chan *Conn),
 					connections: make(map[*Conn]bool),
 				}
 				var contextLogger = log.WithFields(log.Fields{
-					"ID":  r.ID,
+					"Tag": r.Tag,
 					"Hub": &hub,
 				})
 				contextLogger.Debug("New HUB")
 				go hub.run()
-				h.hubs[r.ID] = hub
+				h.hubs[r.Tag] = hub
 				// By the end reply to the sender
 			}
-			r.Rep <- h.hubs[r.ID]
+			r.Rep <- h.hubs[r.Tag]
 		case hub := <-h.unregister:
 			log.Debug("In the hubs' unregister")
 			if _, ok := h.hubs[hub]; ok {
 				var contextLogger = log.WithFields(log.Fields{
-					"ID":  hub,
+					"Tag": hub,
 					"Hub": h.hubs[hub],
 				})
 				contextLogger.Debug("Unregistering HUB")
@@ -109,7 +109,7 @@ func (h *Hub) run() {
 			}
 			// If the last element has been removed exit)
 			if len(h.connections) == 0 {
-				AllHubs.unregister <- h.ID
+				AllHubs.unregister <- h.Tag
 				return
 			}
 		case message := <-h.broadcast:
