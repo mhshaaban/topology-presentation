@@ -109,8 +109,6 @@ func (c *Conn) writePump() {
 			b, _ := json.Marshal(message)
 			w.Write(b)
 
-			//			websocket.WriteJSON(c.ws, &message)
-
 			// Add queued chat messages to the current websocket message.
 			n := len(c.send)
 			for i := 0; i < n; i++ {
