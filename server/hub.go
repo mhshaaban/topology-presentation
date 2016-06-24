@@ -74,6 +74,7 @@ func (h *Hubs) Run() {
 			}
 			r.Rep <- h.hubs[r.ID]
 		case hub := <-h.unregister:
+			log.Debug("In the hubs' unregister")
 			if _, ok := h.hubs[hub]; ok {
 				var contextLogger = log.WithFields(log.Fields{
 					"ID":  hub,
@@ -90,8 +91,18 @@ func (h *Hub) run() {
 		select {
 		case conn := <-h.register:
 			h.connections[conn] = true
+			log.WithFields(log.Fields{
+				"Connections": len(h.connections),
+				"Connection":  conn,
+				"Hub":         &h,
+			}).Debug("Registerng connection")
 		case conn := <-h.unregister:
 			if _, ok := h.connections[conn]; ok {
+				log.WithFields(log.Fields{
+					"Connections": len(h.connections),
+					"Connection":  conn,
+					"Hub":         &h,
+				}).Debug("Unregisterng connection")
 				delete(h.connections, conn)
 				close(conn.send)
 			}
