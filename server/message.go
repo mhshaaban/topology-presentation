@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"regexp"
 )
 
@@ -33,10 +34,18 @@ func createMessage() *Message {
 	return &Message{}
 }
 
+func (m *Message) Serialize() ([]byte, error) {
+	return json.Marshal(m)
+}
+
 // Set function updates the content of message m awwording to input n
 // And it fills the Msg's interface Contract
-func (m *Message) Set(n InMessage) {
-	message := n.(Node)
+func (m *Message) Set(n []byte) error {
+	var message Node
+	err := json.Unmarshal(n, &message)
+	if err != nil {
+		return err
+	}
 
 	found := false
 	nodeTag := 0
@@ -95,4 +104,5 @@ func (m *Message) Set(n InMessage) {
 		// Add a dummy link for d3.js
 		m.Links = append(m.Links, Link{Source: 0, Target: 0})
 	}
+	return nil
 }

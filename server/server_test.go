@@ -100,24 +100,22 @@ func TestServeWs(t *testing.T) {
 				t.Errorf("write:", err)
 
 			}
-			/*
-				case <-interrupt:
-					t.Logf("interrupt")
-					// To cleanly close a connection, a client should send a close
-					// frame and wait for the server to close the connection.
-					err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-					if err != nil {
-						t.Errorf("write close:", err)
+		case <-time.After(10 * time.Second):
+			t.Logf("interrupt")
+			// To cleanly close a connection, a client should send a close
+			// frame and wait for the server to close the connection.
+			err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			if err != nil {
+				t.Errorf("write close:", err)
 
-					}
-					select {
-					case <-done:
-					case <-time.After(time.Second):
+			}
+			select {
+			case <-done:
+			case <-time.After(time.Second):
 
-					}
-					c.Close()
-					return
-			*/
+			}
+			c.Close()
+			return
 		}
 
 	}

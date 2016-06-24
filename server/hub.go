@@ -8,12 +8,10 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-// InMessage is the message received as input
-type InMessage interface{}
-
 // OutMessage is the message that will be output
 type OutMessage interface {
-	Set(n InMessage)
+	Set(n []byte) error
+	Serialize() ([]byte, error)
 }
 
 // hub maintains the set of active connections and broadcasts messages to the
@@ -29,7 +27,7 @@ type hub struct {
 	message *OutMessage
 
 	// Inbound messages from the connections for processing purpose.
-	process chan interface{}
+	process chan []byte
 
 	// Inbound messages from the connections.
 	broadcast chan OutMessage
@@ -76,7 +74,7 @@ func (h *hubs) Run() {
 				var hub = &hub{
 					Tag:         r.Tag,
 					message:     &r.Message,
-					process:     make(chan interface{}),
+					process:     make(chan []byte),
 					broadcast:   make(chan OutMessage),
 					register:    make(chan *Conn),
 					unregister:  make(chan *Conn),
@@ -134,7 +132,16 @@ func (h *hub) run() {
 			log.WithFields(log.Fields{
 				"hub": &h,
 			}).Debug("process")
-			(*h.message).Set(inMessage)
+			err := (*h.message).Set(inMessage)
+			if err != nil {
+				log.WithFields(log.Fields{
+					"hub": &h,
+				}).Debug("Cannot process message, diescarding it", err)
+			} else {
+				go func() {
+					h.broadcast <- *h.message
+				}()
+			}
 		case outMessage := <-h.broadcast:
 			log.WithFields(log.Fields{
 				"hub": &h,

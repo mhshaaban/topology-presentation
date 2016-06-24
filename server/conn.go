@@ -57,7 +57,6 @@ func (c *Conn) readPump(h *hub) {
 	c.ws.SetReadDeadline(time.Now().Add(pongWait))
 	c.ws.SetPongHandler(func(string) error { c.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
-		var message Node
 		t, b, err := c.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
@@ -68,14 +67,7 @@ func (c *Conn) readPump(h *hub) {
 		if t == websocket.PingMessage {
 			continue
 		}
-		err = json.Unmarshal(b, &message)
-		if err != nil {
-			contextLogger.Error(err)
-			return
-		}
-		contextLogger.Debug(message)
-		h.process <- message
-		h.broadcast <- *h.message
+		h.process <- b
 	}
 }
 
@@ -112,12 +104,17 @@ func (c *Conn) writePump() {
 			// Add queued chat messages to the current websocket message.
 			n := len(c.send)
 			for i := 0; i < n; i++ {
-				//websocket.WriteJSON(c.ws, <-c.send)
-				b, _ := json.Marshal(<-c.send)
-				w.Write([]byte{'\n'})
+				//b, _ := json.Marshal(<-c.send)
 
-				w.Write(b)
-				//w.Write(<-c.send)
+				//w.Write(b)
+				out := <-c.send
+				b, err := out.Serialize()
+				if err != nil {
+					log.Println("cannot serialize message)")
+				} else {
+					w.Write([]byte{'\n'})
+					w.Write(b)
+				}
 			}
 
 			if err := w.Close(); err != nil {
