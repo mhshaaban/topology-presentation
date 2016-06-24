@@ -77,12 +77,11 @@ func (c *Conn) readPump(Tag Tag, h *hub) {
 		}
 		contextLogger.Debug(message)
 
-		topologies.Lock()
 		found := false
 		nodeTag := 0
-		for i, node := range topologies.t[Tag].Nodes {
+		for i, node := range h.message.Nodes {
 			if node.UUID == message.UUID {
-				topologies.t[Tag].Nodes[i].Status = message.Status
+				h.message.Nodes[i].Status = message.Status
 				switch message.Status {
 				case "initial":
 					message.Color = "black"
@@ -97,7 +96,7 @@ func (c *Conn) readPump(Tag Tag, h *hub) {
 				default:
 					message.Color = "black"
 				}
-				topologies.t[Tag].Nodes[i].Color = message.Color
+				h.message.Nodes[i].Color = message.Color
 				found = true
 			}
 			nodeTag = i + 1
@@ -120,25 +119,26 @@ func (c *Conn) readPump(Tag Tag, h *hub) {
 				message.Icon = icon
 			}
 			message.Tag = nodeTag
-			topologies.t[Tag].Nodes = append(topologies.t[Tag].Nodes, message)
+			h.message.Nodes = append(h.message.Nodes, message)
 			// Add a link to the previous node
 			if nodeTag >= 1 {
-				topologies.t[Tag].Links = append(topologies.t[Tag].Links, Link{Source: nodeTag, Target: nodeTag - 1})
+				h.message.Links = append(h.message.Links, Link{Source: nodeTag, Target: nodeTag - 1})
 
 			}
 		}
 		if message.Status == "error" {
-			topologies.t[Tag].Message = "error"
+			h.message.Message = "error"
 		} else {
-			topologies.t[Tag].Message = "info"
+			h.message.Message = "info"
 		}
-		if len(topologies.t[Tag].Links) == 0 {
+		if len(h.message.Links) == 0 {
 			// Add a dummy link for d3.js
-			topologies.t[Tag].Links = append(topologies.t[Tag].Links, Link{Source: 0, Target: 0})
+			h.message.Links = append(h.message.Links, Link{Source: 0, Target: 0})
 		}
-		//log.Debug("==> [%v] Broadcasting message: %v", Tag, topologies.t[Tag])
-		h.broadcast <- *topologies.t[Tag]
-		topologies.Unlock()
+		//log.Debug("==> [%v] Broadcasting message: %v", Tag, h.message)
+		//h.broadcast <- *h.message
+		h.process <- *h.message
+		h.broadcast <- *h.message
 	}
 }
 

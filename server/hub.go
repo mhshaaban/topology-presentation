@@ -18,7 +18,10 @@ type hub struct {
 	connections map[*Conn]bool
 
 	// The last message broadcasted
-	message Message
+	message *Message
+
+	// Inbound messages from the connections for processing purpose.
+	process chan Message
 
 	// Inbound messages from the connections.
 	broadcast chan Message
@@ -63,6 +66,8 @@ func (h *hubs) Run() {
 				//TODO create a new hub
 				var hub = &hub{
 					Tag:         r.Tag,
+					process:     make(chan Message),
+					message:     &Message{},
 					broadcast:   make(chan Message),
 					register:    make(chan *Conn),
 					unregister:  make(chan *Conn),
@@ -116,6 +121,11 @@ func (h *hub) run() {
 				AllHubs.unregister <- h.Tag
 				return
 			}
+		case message := <-h.process:
+			log.WithFields(log.Fields{
+				"hub": &h,
+			}).Debug("process")
+			h.message.set(message)
 		case message := <-h.broadcast:
 			log.WithFields(log.Fields{
 				"hub": &h,

@@ -24,3 +24,8 @@ type Message struct {
 	Nodes   []Node `json:"nodes"`
 	Links   []Link `json:"links"`
 }
+
+// This function updates the content of message m awwording to input n
+func (m *Message) set(n Message) {
+	*m = n
+}
