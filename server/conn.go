@@ -7,7 +7,6 @@ package server
 import (
 	"encoding/json"
 	log "github.com/Sirupsen/logrus"
-	"regexp"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -42,7 +41,7 @@ type Conn struct {
 	ws *websocket.Conn
 
 	// Buffered channel of outbound messages.
-	send chan Message
+	send chan OutMessage
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -59,7 +58,6 @@ func (c *Conn) readPump(Tag Tag, h *hub) {
 	c.ws.SetPongHandler(func(string) error { c.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
 		var message Node
-		//err := websocket.ReadJSON(c.ws, &message)
 		t, b, err := c.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
@@ -76,68 +74,7 @@ func (c *Conn) readPump(Tag Tag, h *hub) {
 			return
 		}
 		contextLogger.Debug(message)
-
-		found := false
-		nodeTag := 0
-		for i, node := range h.message.Nodes {
-			if node.UUID == message.UUID {
-				h.message.Nodes[i].Status = message.Status
-				switch message.Status {
-				case "initial":
-					message.Color = "black"
-				case "configured":
-					message.Color = "cyan"
-				case "started":
-					message.Color = "green"
-				case "stopped":
-					message.Color = "orange"
-				case "deleted":
-					message.Color = "red"
-				default:
-					message.Color = "black"
-				}
-				h.message.Nodes[i].Color = message.Color
-				found = true
-			}
-			nodeTag = i + 1
-		}
-		// New node
-		if !found {
-
-			var ios = regexp.MustCompile(`(?i).*ios|iphone.*`)
-			var android = regexp.MustCompile(`(?i).*android.*`)
-			if message.Icon == "" {
-				var icon string
-				switch {
-				case ios.MatchString(message.Device):
-					icon = "/img/iphone-phone-color.png"
-				case android.MatchString(message.Device):
-					icon = "/img/android-phone-color.png"
-				default:
-					icon = "/img/smartphone.png"
-				}
-				message.Icon = icon
-			}
-			message.Tag = nodeTag
-			h.message.Nodes = append(h.message.Nodes, message)
-			// Add a link to the previous node
-			if nodeTag >= 1 {
-				h.message.Links = append(h.message.Links, Link{Source: nodeTag, Target: nodeTag - 1})
-
-			}
-		}
-		if message.Status == "error" {
-			h.message.Message = "error"
-		} else {
-			h.message.Message = "info"
-		}
-		if len(h.message.Links) == 0 {
-			// Add a dummy link for d3.js
-			h.message.Links = append(h.message.Links, Link{Source: 0, Target: 0})
-		}
-		//log.Debug("==> [%v] Broadcasting message: %v", Tag, h.message)
-		//h.broadcast <- *h.message
-		h.process <- *h.message
+		h.process <- message
 		h.broadcast <- *h.message
 	}
 }

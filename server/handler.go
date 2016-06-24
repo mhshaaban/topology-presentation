@@ -25,7 +25,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	conn := &Conn{send: make(chan Message, 256), ws: ws}
+	conn := &Conn{send: make(chan OutMessage, 256), ws: ws}
 	reply := &reply{
 		Tag: Tag,
 		Rep: make(chan *hub),

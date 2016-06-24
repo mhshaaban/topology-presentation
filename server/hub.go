@@ -8,6 +8,14 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+// InMessage is the message received as input
+type InMessage interface{}
+
+// OutMessage is the message that will be output
+type OutMessage interface {
+	set(InMessage)
+}
+
 // hub maintains the set of active connections and broadcasts messages to the
 // connections.
 type hub struct {
@@ -18,13 +26,13 @@ type hub struct {
 	connections map[*Conn]bool
 
 	// The last message broadcasted
-	message *Message
+	message *OutMessage
 
 	// Inbound messages from the connections for processing purpose.
-	process chan Message
+	process chan interface{}
 
 	// Inbound messages from the connections.
-	broadcast chan Message
+	broadcast chan OutMessage
 
 	// Register requests from the connections.
 	register chan *Conn
@@ -66,9 +74,8 @@ func (h *hubs) Run() {
 				//TODO create a new hub
 				var hub = &hub{
 					Tag:         r.Tag,
-					process:     make(chan Message),
-					message:     &Message{},
-					broadcast:   make(chan Message),
+					process:     make(chan interface{}),
+					broadcast:   make(chan OutMessage),
 					register:    make(chan *Conn),
 					unregister:  make(chan *Conn),
 					connections: make(map[*Conn]bool),
@@ -121,12 +128,12 @@ func (h *hub) run() {
 				AllHubs.unregister <- h.Tag
 				return
 			}
-		case message := <-h.process:
+		case inMessage := <-h.process:
 			log.WithFields(log.Fields{
 				"hub": &h,
 			}).Debug("process")
-			h.message.set(message)
-		case message := <-h.broadcast:
+			(*h.message).set(inMessage)
+		case outMessage := <-h.broadcast:
 			log.WithFields(log.Fields{
 				"hub": &h,
 			}).Debug("Broadcast")
@@ -136,7 +143,7 @@ func (h *hub) run() {
 					"hub":        &h,
 				}).Debug("Sending...")
 				select {
-				case conn.send <- message:
+				case conn.send <- outMessage:
 				default:
 					close(conn.send)
 					//delete(hub.connections, conn)
