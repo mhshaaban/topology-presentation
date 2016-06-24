@@ -45,8 +45,9 @@ type Reply struct {
 }
 
 var AllHubs = Hubs{
-	Request: make(chan *Reply),
-	hubs:    make(map[int]*Hub),
+	unregister: make(chan int),
+	Request:    make(chan *Reply),
+	hubs:       make(map[int]*Hub),
 }
 
 // The main routine for registering the hubs
