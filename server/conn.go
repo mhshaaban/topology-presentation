@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -44,7 +45,7 @@ type Conn struct {
 }
 
 // readPump pumps messages from the websocket connection to the hub.
-func (c *Conn) readPump(ID string, h *Hub) {
+func (c *Conn) readPump(ID int, h *Hub) {
 	defer func() {
 		h.unregister <- c
 		c.ws.Close()
@@ -144,7 +145,7 @@ func (c *Conn) write(mt int, payload Message) error {
 }
 
 // writePump pumps messages from the hub to the websocket connection.
-func (c *Conn) writePump(ID string) {
+func (c *Conn) writePump(ID int) {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
@@ -195,7 +196,11 @@ func (c *Conn) writePump(ID string) {
 func serveWs(w http.ResponseWriter, r *http.Request) {
 	//Let's get the ID
 	vars := mux.Vars(r)
-	ID := vars["id"]
+	ID, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		log.Printf("No ID provided, bailing out")
+		return
+	}
 	log.Printf("=> Connection to %v", ID)
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -203,35 +208,13 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	conn := &Conn{send: make(chan Message, 256), ws: ws}
-	if ID == "" {
-		log.Printf("No ID provided, bailing out")
-		return
+	topologies.t[ID] = &Message{}
+	reply := &Reply{
+		ID:  ID,
+		Rep: make(chan *Hub),
 	}
-	/*
-		if _, ok := hubs.h[ID]; ok {
-			log.Printf("==> [%v] A hub alredy exist for this ID", ID)
-			hubs.h[ID].register <- conn
-		} else {
-			log.Printf("==> [%v] Creating a new hub", ID)
-			hubs.h[ID] = &Hub{
-				broadcast:   make(chan Message),
-				register:    make(chan *Conn),
-				unregister:  make(chan *Conn),
-				connections: make(map[*Conn]bool),
-			}
-			go hubs.h[ID].run()
-			hubs.h[ID].register <- conn
-			log.Printf("==> [%v] Creating a new topology", ID)
-			topologies.t[ID] = &Message{}
-		}
-	*/
-	var hub = &Hub{
-		broadcast:   make(chan Message),
-		register:    make(chan *Conn),
-		unregister:  make(chan *Conn),
-		connections: make(map[*Conn]bool),
-	}
-	go hub.run()
+	AllHubs.Request <- reply
+	hub := <-reply.Rep
 	go conn.writePump(ID)
 	conn.readPump(ID, hub)
 }

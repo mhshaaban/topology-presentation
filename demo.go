@@ -64,6 +64,7 @@ func main() {
 
 	router := server.NewRouter()
 
+	go server.AllHubs.Run()
 	addr := fmt.Sprintf("%v:%v", config.Address, config.Port)
 	if config.Scheme == "https" {
 		log.Fatal(http.ListenAndServeTLS(addr, config.Certificate, config.PrivateKey, router))

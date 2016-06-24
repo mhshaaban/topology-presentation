@@ -6,5 +6,5 @@ import (
 
 var topologies = struct {
 	sync.RWMutex
-	t map[string]*Message
-}{t: make(map[string]*Message)}
+	t map[int]*Message
+}{t: make(map[int]*Message)}

@@ -54,7 +54,18 @@ func (h *Hubs) Run() {
 				r.Rep <- hub
 			} else {
 				//TODO create a new hub
+				var hub = &Hub{
+					ID:          r.ID,
+					broadcast:   make(chan Message),
+					register:    make(chan *Conn),
+					unregister:  make(chan *Conn),
+					connections: make(map[*Conn]bool),
+				}
+				go hub.run()
 				// And add it to the hubs map
+				h.hubs[r.ID] = hub
+				r.Rep <- hub
+				// By the end reply to the sender
 			}
 		case hub := <-h.unregister:
 			if _, ok := h.hubs[hub]; ok {
