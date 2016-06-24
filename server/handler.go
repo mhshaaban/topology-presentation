@@ -36,7 +36,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	AllHubs.Request <- reply
 	hub := <-reply.Rep
 	hub.register <- conn
-	go conn.writePump(Tag)
-	conn.readPump(Tag, hub)
+	go conn.writePump()
+	conn.readPump(hub)
 	contextLogger.Info("Connection ended")
 }

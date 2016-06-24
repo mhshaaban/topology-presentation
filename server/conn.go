@@ -45,9 +45,9 @@ type Conn struct {
 }
 
 // readPump pumps messages from the websocket connection to the hub.
-func (c *Conn) readPump(Tag Tag, h *hub) {
+func (c *Conn) readPump(h *hub) {
 	var contextLogger = log.WithFields(log.Fields{
-		"Tag": Tag,
+		"Tag": h.Tag,
 	})
 	defer func() {
 		h.unregister <- c
@@ -86,7 +86,7 @@ func (c *Conn) write(mt int, payload Message) error {
 }
 
 // writePump pumps messages from the hub to the websocket connection.
-func (c *Conn) writePump(Tag Tag) {
+func (c *Conn) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
