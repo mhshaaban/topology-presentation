@@ -27,8 +27,9 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	}
 	conn := &Conn{send: make(chan OutMessage, 256), ws: ws}
 	reply := &reply{
-		Tag: Tag,
-		Rep: make(chan *hub),
+		Message: createMessage(),
+		Tag:     Tag,
+		Rep:     make(chan *hub),
 	}
 	defer close(reply.Rep)
 

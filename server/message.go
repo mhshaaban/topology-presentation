@@ -29,8 +29,13 @@ type Message struct {
 	Links   []Link `json:"links"`
 }
 
-// This function updates the content of message m awwording to input n
-func (m *Message) set(n interface{}) {
+func createMessage() *Message {
+	return &Message{}
+}
+
+// Set function updates the content of message m awwording to input n
+// And it fills the Msg's interface Contract
+func (m *Message) Set(n InMessage) {
 	message := n.(Node)
 
 	found := false

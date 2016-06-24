@@ -13,7 +13,7 @@ type InMessage interface{}
 
 // OutMessage is the message that will be output
 type OutMessage interface {
-	set(InMessage)
+	Set(n InMessage)
 }
 
 // hub maintains the set of active connections and broadcasts messages to the
@@ -54,8 +54,9 @@ type hubs struct {
 }
 
 type reply struct {
-	Tag Tag
-	Rep chan *hub
+	Tag     Tag
+	Message OutMessage
+	Rep     chan *hub
 }
 
 // AllHubs is the actual registry of all hubs
@@ -74,6 +75,7 @@ func (h *hubs) Run() {
 				//TODO create a new hub
 				var hub = &hub{
 					Tag:         r.Tag,
+					message:     &r.Message,
 					process:     make(chan interface{}),
 					broadcast:   make(chan OutMessage),
 					register:    make(chan *Conn),
@@ -132,7 +134,7 @@ func (h *hub) run() {
 			log.WithFields(log.Fields{
 				"hub": &h,
 			}).Debug("process")
-			(*h.message).set(inMessage)
+			(*h.message).Set(inMessage)
 		case outMessage := <-h.broadcast:
 			log.WithFields(log.Fields{
 				"hub": &h,
