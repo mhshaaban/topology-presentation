@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"strings"
 	"testing"
 	"time"
 )
@@ -82,45 +81,20 @@ func TestServeWs(t *testing.T) {
 			_, message, err := c.ReadMessage()
 			if err != nil {
 				t.Errorf("read: %v", err)
-
 			}
 			t.Logf("recv: %s", message)
 		}
 
 	}()
-
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case tick := <-ticker.C:
-			err := c.WriteMessage(websocket.TextMessage, []byte(tick.String()))
-			if err != nil {
-				t.Errorf("write:", err)
-
-			}
-		case <-time.After(10 * time.Second):
-			t.Logf("interrupt")
-			// To cleanly close a connection, a client should send a close
-			// frame and wait for the server to close the connection.
-			err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-			if err != nil {
-				t.Errorf("write close:", err)
-
-			}
-			select {
-			case <-done:
-			case <-time.After(time.Second):
-
-			}
-			c.Close()
-			return
-		}
-
-	}
-	message := &server.Message{}
+	message := &server.Node{}
 	b, err := json.Marshal(message)
-	reader = strings.NewReader(string(b))
-
+	if err != nil {
+		t.Error(err)
+	}
+	//reader = strings.NewReader(string(b))
+	err = c.WriteMessage(websocket.TextMessage, b)
+	if err != nil {
+		t.Errorf("write:", err)
+	}
+	<-time.After(5 * time.Second)
 }
