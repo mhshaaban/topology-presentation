@@ -75,17 +75,13 @@ func TestServeWs(t *testing.T) {
 	done := make(chan bool)
 
 	go func() {
-		defer c.Close()
 		defer close(done)
-		for {
-			_, message, err := c.ReadMessage()
-			if err != nil {
-				t.Errorf("read: %v", err)
-			}
-			t.Logf("recv: %s", message)
-			done <- true
+		_, message, err := c.ReadMessage()
+		if err != nil {
+			t.Errorf("read: %v", err)
 		}
-
+		t.Logf("recv: %s", message)
+		done <- true
 	}()
 	message := &server.Node{}
 	b, err := json.Marshal(message)
@@ -93,10 +89,14 @@ func TestServeWs(t *testing.T) {
 		t.Error(err)
 	}
 	//reader = strings.NewReader(string(b))
+	t.Logf("Writing...")
 	err = c.WriteMessage(websocket.TextMessage, b)
+	t.Logf("Done...")
 	if err != nil {
 		t.Errorf("write:", err)
 	}
+	t.Logf("Waiting...")
 	<-done
+	t.Logf("End...")
 	//<-time.After(5 * time.Second)
 }

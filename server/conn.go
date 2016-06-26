@@ -21,7 +21,7 @@ const (
 	writeWait = 10 * time.Second
 
 	// Time allowed to read the next pong message from the peer.
-	pongWait = 60 * time.Minute
+	pongWait = 60 * time.Second
 
 	// Send pings to peer with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
@@ -72,9 +72,11 @@ func (c *Conn) readPump(h *hub) {
 }
 
 // write writes a message with the given message type and payload.
-func (c *Conn) write(mt int, payload Message) error {
+func (c *Conn) write(mt int, payload []byte) error {
 	c.ws.SetWriteDeadline(time.Now().Add(writeWait))
-	return websocket.WriteJSON(c.ws, &payload)
+	//return websocket.WriteJSON(c.ws, &payload)
+	return c.ws.WriteMessage(mt, payload)
+
 }
 
 // writePump pumps messages from the hub to the websocket connection.
@@ -89,7 +91,7 @@ func (c *Conn) writePump() {
 		case message, ok := <-c.send:
 			if !ok {
 				// The hub closed the channel.
-				c.write(websocket.CloseMessage, Message{})
+				c.write(websocket.CloseMessage, []byte{})
 				return
 			}
 
@@ -121,7 +123,7 @@ func (c *Conn) writePump() {
 				return
 			}
 		case <-ticker.C:
-			if err := c.write(websocket.PingMessage, Message{Message: "ping"}); err != nil {
+			if err := c.write(websocket.PingMessage, []byte{}); err != nil {
 				return
 			}
 		}
