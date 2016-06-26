@@ -97,6 +97,12 @@ func TestServeWs(t *testing.T) {
 	}
 	t.Logf("Waiting...")
 	<-done
+	err = c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseGoingAway, ""))
+	if err != nil {
+		t.Errorf("write close: %v", err)
+		return
+
+	}
 	t.Logf("End...")
 	//<-time.After(5 * time.Second)
 }
