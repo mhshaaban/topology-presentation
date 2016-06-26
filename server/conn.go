@@ -57,15 +57,12 @@ func (c *Conn) readPump(h *hub) {
 	c.ws.SetReadDeadline(time.Now().Add(pongWait))
 	c.ws.SetPongHandler(func(string) error { c.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
-		t, b, err := c.ws.ReadMessage()
+		_, b, err := c.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
 				contextLogger.Error(err)
 			}
 			break
-		}
-		if t == websocket.PingMessage {
-			continue
 		}
 		h.process <- b
 	}
@@ -124,6 +121,7 @@ func (c *Conn) writePump() {
 			}
 		case <-ticker.C:
 			if err := c.write(websocket.PingMessage, []byte{}); err != nil {
+				log.Println("Error, cannot ping", err)
 				return
 			}
 		}

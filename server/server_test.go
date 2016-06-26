@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/owulveryck/topology-presentation/server"
+	"time"
 
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
-	//"time"
 )
 
 var (
@@ -29,6 +29,27 @@ func init() {
 
 }
 
+func TestPingPong(t *testing.T) {
+	tsURL, err := url.Parse(testServer.URL)
+	if err != nil {
+		t.Error(err)
+	}
+	wsURL := url.URL{Scheme: "ws", Host: tsURL.Host, Path: "/serveWs/1234"}
+	c, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	if err != nil {
+		t.Errorf("Cannot connect to the websocket %v", err)
+
+	}
+	defer c.Close()
+	if err := c.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(2*time.Second)); err != nil {
+		t.Errorf("write close: %v", err)
+	}
+	err = c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseGoingAway, ""))
+	if err != nil {
+		t.Errorf("write close: %v", err)
+	}
+
+}
 func TestServeWs(t *testing.T) {
 	tsURL, err := url.Parse(testServer.URL)
 	if err != nil {
@@ -100,8 +121,6 @@ func TestServeWs(t *testing.T) {
 	err = c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseGoingAway, ""))
 	if err != nil {
 		t.Errorf("write close: %v", err)
-		return
-
 	}
 	t.Logf("End...")
 	//<-time.After(5 * time.Second)
