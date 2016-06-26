@@ -11,7 +11,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"testing"
-	"time"
+	//"time"
 )
 
 var (
@@ -72,7 +72,7 @@ func TestServeWs(t *testing.T) {
 	}
 	defer c.Close()
 
-	done := make(chan struct{})
+	done := make(chan bool)
 
 	go func() {
 		defer c.Close()
@@ -83,6 +83,7 @@ func TestServeWs(t *testing.T) {
 				t.Errorf("read: %v", err)
 			}
 			t.Logf("recv: %s", message)
+			done <- true
 		}
 
 	}()
@@ -96,5 +97,6 @@ func TestServeWs(t *testing.T) {
 	if err != nil {
 		t.Errorf("write:", err)
 	}
-	<-time.After(5 * time.Second)
+	<-done
+	//<-time.After(5 * time.Second)
 }
