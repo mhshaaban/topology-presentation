@@ -3,6 +3,7 @@ package server
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
+	"github.com/owulveryck/topology-presentation/message"
 	"net/http"
 )
 
@@ -27,7 +28,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	}
 	conn := &Conn{send: make(chan OutMessage, 256), ws: ws}
 	reply := &reply{
-		Message: createMessage(),
+		Message: message.CreateMessage(),
 		Tag:     Tag,
 		Rep:     make(chan *hub),
 	}

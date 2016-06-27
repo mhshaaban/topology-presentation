@@ -1,4 +1,4 @@
-package server
+package message
 
 import (
 	"encoding/json"
@@ -30,10 +30,12 @@ type Message struct {
 	Links   []Link `json:"links"`
 }
 
-func createMessage() *Message {
+// CreateMessage creates a new message and returns a pointer
+func CreateMessage() *Message {
 	return &Message{}
 }
 
+// Serialize returns a byte array of the message
 func (m *Message) Serialize() ([]byte, error) {
 	return json.Marshal(m)
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/owulveryck/topology-presentation/message"
 	"github.com/owulveryck/topology-presentation/server"
 	"time"
 
@@ -17,7 +18,7 @@ import (
 var (
 	testServer *httptest.Server
 	reader     io.Reader //Ignore this for now
-	baseWsUrl  string
+	baseWsURL  string
 )
 
 func init() {
@@ -25,7 +26,7 @@ func init() {
 	go server.AllHubs.Run()
 	testServer = httptest.NewServer(router) //Creating new server with the user handlers
 
-	baseWsUrl = fmt.Sprintf("%s/serveWs/", testServer.URL) //Grab the address for the endpoint
+	baseWsURL = fmt.Sprintf("%s/serveWs/", testServer.URL) //Grab the address for the endpoint
 
 }
 
@@ -104,7 +105,7 @@ func TestServeWs(t *testing.T) {
 		t.Logf("recv: %s", message)
 		done <- true
 	}()
-	message := &server.Node{}
+	message := &message.Node{}
 	b, err := json.Marshal(message)
 	if err != nil {
 		t.Error(err)
