@@ -22,7 +22,6 @@ import (
 	"os"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/owulveryck/topology-presentation/server"
 )
 
 type configuration struct {
@@ -62,9 +61,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	router := server.NewRouter()
+	router := newRouter()
 
-	go server.AllHubs.Run()
 	addr := fmt.Sprintf("%v:%v", config.Address, config.Port)
 	if config.Scheme == "https" {
 		log.Fatal(http.ListenAndServeTLS(addr, config.Certificate, config.PrivateKey, router))

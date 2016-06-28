@@ -1,8 +1,9 @@
-package server
+package main
 
 import (
 	"encoding/json"
 	"regexp"
+	"strconv"
 )
 
 // Node is a structure describing a single node
@@ -105,4 +106,22 @@ func (m *Message) Set(n []byte) error {
 		m.Links = append(m.Links, Link{Source: 0, Target: 0})
 	}
 	return nil
+}
+
+type tag int
+
+func (t *tag) Parse(s string) error {
+	v, err := strconv.Atoi(s)
+	if err != nil {
+		return err
+
+	}
+	*t = tag(v)
+	return nil
+
+}
+
+func newTag() *tag {
+	return new(tag)
+
 }

@@ -12,16 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package main
 
 import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/owulveryck/gowmb"
 )
 
 // NewRouter is the constructor for all my routes
-func NewRouter() *mux.Router {
+func newRouter() *mux.Router {
+
+	handler := gowmb.CreateHandler(createMessage(), newTag(), "tag")
 
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -29,7 +32,7 @@ func NewRouter() *mux.Router {
 		Methods("GET").
 		Path("/serveWs/{tag}").
 		Name("WebSocket").
-		HandlerFunc(serveWs)
+		HandlerFunc(handler)
 	router.
 		Methods("GET").
 		PathPrefix("/").
