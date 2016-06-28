@@ -40,7 +40,8 @@ btnStep.onclick = function() {
   } 
 };
 
-var demourl = window.location.protocol +'//'+ window.location.hostname+':'+window.location.port;
+//var demourl = window.location.protocol +'//'+ window.location.hostname+':'+window.location.port;
+var demourl = window.location.protocol +'//'+ window.location.hostname;
 document.getElementById("demourl").innerHTML = demourl;
 document.getElementById("demourl").href = demourl;
 new QRCode(document.getElementById("qrcode"), {
